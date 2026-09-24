@@ -4,9 +4,13 @@ namespace App\Entity;
 
 use App\Entity\Traits\TimestampTrait;
 use App\Repository\ProjectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
+#[HasLifecycleCallbacks]
 class Project
 {
     use TimestampTrait;
@@ -25,6 +29,17 @@ class Project
     #[ORM\ManyToOne(inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
+
+    /**
+     * @var Collection<int, ProjectMember>
+     */
+    #[ORM\OneToMany(targetEntity: ProjectMember::class, mappedBy: 'project', orphanRemoval: true)]
+    private Collection $members;
+
+    public function __construct()
+    {
+        $this->members = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -63,6 +78,36 @@ class Project
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProjectMember>
+     */
+    public function getMembers(): Collection
+    {
+        return $this->members;
+    }
+
+    public function addMember(ProjectMember $member): static
+    {
+        if (!$this->members->contains($member)) {
+            $this->members->add($member);
+            $member->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMember(ProjectMember $member): static
+    {
+        if ($this->members->removeElement($member)) {
+            // set the owning side to null (unless already changed)
+            if ($member->getProject() === $this) {
+                $member->setProject(null);
+            }
+        }
 
         return $this;
     }
