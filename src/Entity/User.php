@@ -55,10 +55,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ProjectMember::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $projectMembers;
 
+    /**
+     * @var Collection<int, Task>
+     */
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'assignee')]
+    private Collection $assignedTasks;
+
+    /**
+     * @var Collection<int, Task>
+     */
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'reporter')]
+    private Collection $reportedTasks;
+
     public function __construct()
     {
         $this->projects = new ArrayCollection();
         $this->projectMembers = new ArrayCollection();
+        $this->assignedTasks = new ArrayCollection();
+        $this->reportedTasks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -208,6 +222,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($projectMember->getUser() === $this) {
                 $projectMember->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getAssignedTasks(): Collection
+    {
+        return $this->assignedTasks;
+    }
+
+    public function addAssignedTask(Task $assignedTask): static
+    {
+        if (!$this->assignedTasks->contains($assignedTask)) {
+            $this->assignedTasks->add($assignedTask);
+            $assignedTask->setAssignee($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAssignedTask(Task $assignedTask): static
+    {
+        if ($this->assignedTasks->removeElement($assignedTask)) {
+            // set the owning side to null (unless already changed)
+            if ($assignedTask->getAssignee() === $this) {
+                $assignedTask->setAssignee(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getReportedTasks(): Collection
+    {
+        return $this->reportedTasks;
+    }
+
+    public function addReportedTask(Task $reportedTask): static
+    {
+        if (!$this->reportedTasks->contains($reportedTask)) {
+            $this->reportedTasks->add($reportedTask);
+            $reportedTask->setReporter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReportedTask(Task $reportedTask): static
+    {
+        if ($this->reportedTasks->removeElement($reportedTask)) {
+            // set the owning side to null (unless already changed)
+            if ($reportedTask->getReporter() === $this) {
+                $reportedTask->setReporter(null);
             }
         }
 
