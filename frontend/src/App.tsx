@@ -5,7 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
 
-function App() {
+export default function App() {
     return (
         <AuthProvider>
             <BrowserRouter>
@@ -26,5 +26,3 @@ function App() {
         </AuthProvider>
     );
 }
-
-export default App;

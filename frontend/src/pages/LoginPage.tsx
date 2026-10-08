@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card } from '../components/ui/Card';
+import styles from './LoginPage.module.css';
 
 export function LoginPage() {
     const [email, setEmail] = useState('');
@@ -38,36 +42,34 @@ export function LoginPage() {
     };
 
     return (
-        <div style={{ maxWidth: 400, margin: '100px auto', padding: 20 }}>
-            <h1>Вход</h1>
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Email<br />
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            style={{ width: '100%', padding: 8 }}
-                        />
-                    </label>
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                    <label>Пароль<br />
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            style={{ width: '100%', padding: 8 }}
-                        />
-                    </label>
-                </div>
-                {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
-                <button type="submit" disabled={loading} style={{ padding: '10px 20px' }}>
-                    {loading ? 'Вход...' : 'Войти'}
-                </button>
-            </form>
+        <div className={styles.wrapper}>
+            <Card className={styles.card}>
+                <h1 className={styles.title}>Вход</h1>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <Input
+                        label="Email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        autoComplete="email"
+                        disabled={loading}
+                    />
+                    <Input
+                        label="Пароль"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        autoComplete="current-password"
+                        disabled={loading}
+                    />
+                    {error && <div className={styles.error}>{error}</div>}
+                    <Button type="submit" disabled={loading}>
+                        {loading ? 'Вход...' : 'Войти'}
+                    </Button>
+                </form>
+            </Card>
         </div>
     );
 }

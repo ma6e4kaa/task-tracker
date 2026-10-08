@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import styles from './ProfilePage.module.css';
 
 interface MeResponse {
     email: string;
@@ -25,20 +28,46 @@ export function ProfilePage() {
         navigate('/login');
     };
 
-    if (error) return <div style={{ padding: 20, color: 'red' }}>Ошибка: {error}</div>;
-    if (!me) return <div style={{ padding: 20 }}>Загрузка...</div>;
+    if (error) {
+        return (
+            <div className={styles.wrapper}>
+                <Card className={styles.card}>
+                    <div className={styles.error}>Ошибка: {error}</div>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!me) {
+        return (
+            <div className={styles.wrapper}>
+                <Card className={styles.card}>
+                    <div className={styles.loading}>Загрузка...</div>
+                </Card>
+            </div>
+        );
+    }
 
     return (
-        <div style={{ maxWidth: 600, margin: '50px auto', padding: 20 }}>
-            <h1>Профиль</h1>
-            <p><strong>Email:</strong> {me.email}</p>
-            <p><strong>Роли:</strong> {me.roles.join(', ')}</p>
-            <button
-                onClick={handleLogout}
-                style={{ padding: '10px 20px', marginTop: 20 }}
-            >
-                Выйти
-            </button>
+        <div className={styles.wrapper}>
+            <Card className={styles.card}>
+                <h1 className={styles.title}>Профиль</h1>
+                <div className={styles.info}>
+                    <div className={styles.row}>
+                        <span className={styles.label}>Email:</span>
+                        <span className={styles.value}>{me.email}</span>
+                    </div>
+                    <div className={styles.row}>
+                        <span className={styles.label}>Роли:</span>
+                        <span className={styles.value}>{me.roles.join(', ')}</span>
+                    </div>
+                </div>
+                <div className={styles.actions}>
+                    <Button variant="danger" onClick={handleLogout}>
+                        Выйти
+                    </Button>
+                </div>
+            </Card>
         </div>
     );
 }
