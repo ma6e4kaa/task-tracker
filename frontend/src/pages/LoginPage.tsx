@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -14,6 +14,8 @@ export function LoginPage() {
 
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const justRegistered = (location.state as { registered?: boolean })?.registered;
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
@@ -45,6 +47,9 @@ export function LoginPage() {
         <div className={styles.wrapper}>
             <Card className={styles.card}>
                 <h1 className={styles.title}>Вход</h1>
+                {justRegistered && (
+                    <div className={styles.success}>Регистрация успешна! Войдите в аккаунт.</div>
+                )}
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <Input
                         label="Email"
@@ -69,6 +74,9 @@ export function LoginPage() {
                         {loading ? 'Вход...' : 'Войти'}
                     </Button>
                 </form>
+                <div className={styles.footer}>
+                    Нет аккаунта? <Link to="/register" className={styles.link}>Зарегистрироваться</Link>
+                </div>
             </Card>
         </div>
     );
