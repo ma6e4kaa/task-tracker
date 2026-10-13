@@ -12,36 +12,42 @@ export function removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
 }
 
+export class ApiError extends Error {
+    constructor(
+        message: string,
+        public readonly status: number,
+    ) {
+        super(message);
+        this.name = 'ApiError';
+    }
+}
+
 export async function apiFetch<T>(
     url: string,
     options: RequestInit = {}
 ): Promise<T> {
     const token = getToken();
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...(options.headers || {}),
+        ...((options.headers as Record<string, string>) || {}),
     };
 
     if (token) {
-        (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+        headers['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await fetch(url, { ...options, headers });
 
-    if (response.status === 401) {
-        removeToken();
-        window.location.href = '/login';
-        throw new Error('Unauthorized');
+    if (response.status === 204) {
+        return undefined as T;
     }
 
     if (!response.ok) {
         const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || error.detail || `HTTP ${response.status}`);
-    }
-
-    if (response.status === 204) {
-        return undefined as T;
+        const message =
+            error.message || error.detail || `HTTP ${response.status}`;
+        throw new ApiError(message, response.status);
     }
 
     return response.json();

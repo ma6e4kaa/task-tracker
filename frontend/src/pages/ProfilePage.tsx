@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useApi } from '../hooks/useApi';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import styles from './ProfilePage.module.css';
@@ -12,21 +12,24 @@ interface MeResponse {
 }
 
 export function ProfilePage() {
-    const [me, setMe] = useState<MeResponse | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const { data: me, error, loading } = useApi<MeResponse>('/api/me');
     const { logout } = useAuth();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        apiFetch<MeResponse>('/api/me')
-            .then(setMe)
-            .catch((err) => setError(err.message));
-    }, []);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
+
+    if (loading) {
+        return (
+            <div className={styles.wrapper}>
+                <Card className={styles.card}>
+                    <div className={styles.loading}>Загрузка...</div>
+                </Card>
+            </div>
+        );
+    }
 
     if (error) {
         return (
@@ -38,15 +41,7 @@ export function ProfilePage() {
         );
     }
 
-    if (!me) {
-        return (
-            <div className={styles.wrapper}>
-                <Card className={styles.card}>
-                    <div className={styles.loading}>Загрузка...</div>
-                </Card>
-            </div>
-        );
-    }
+    if (!me) return null;
 
     return (
         <div className={styles.wrapper}>
