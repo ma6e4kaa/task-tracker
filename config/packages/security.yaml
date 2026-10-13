@@ -11,6 +11,9 @@ security:
                 class: App\Entity\User
                 property: email
 
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+
     firewalls:
         dev:
             # Ensure dev tools and static assets are always allowed
@@ -20,6 +23,7 @@ security:
         login:
             pattern: ^/api/login
             stateless: true
+            user_checker: App\Security\UserChecker
             json_login:
                 check_path: /api/login_check
                 username_path: email
@@ -30,6 +34,7 @@ security:
         api:
             pattern: ^/api
             stateless: true
+            user_checker: App\Security\UserChecker
             jwt: ~
         main:
             lazy: true
@@ -43,9 +48,9 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-         - { path: ^/api/register, roles: PUBLIC_ACCESS }
-         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

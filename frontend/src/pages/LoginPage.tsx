@@ -34,7 +34,14 @@ export function LoginPage() {
             }
 
             const data = await response.json();
-            login(data.token);
+            const token = data.token;
+
+            const meResponse = await fetch('/api/me', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const me = await meResponse.json();
+
+            login(token, { email: me.email, roles: me.roles });
             navigate('/profile');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка входа');

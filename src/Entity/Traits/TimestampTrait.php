@@ -6,13 +6,16 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\PrePersist;
 use Doctrine\ORM\Mapping\PreUpdate;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 trait TimestampTrait
 {
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?DateTimeImmutable $updatedAt = null;
 
     #[PrePersist]

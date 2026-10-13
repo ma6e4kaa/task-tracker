@@ -1,33 +1,87 @@
-import React, {createContext, useContext, useState, ReactNode} from 'react';
-import {getToken, setToken, removeToken} from '../api/client';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getToken, setToken, removeToken, apiFetch } from '../api/client';
+
+interface AuthUser {
+    email: string;
+    roles: string[];
+}
 
 interface AuthContextType {
     token: string | null;
+    user: AuthUser | null;
     isAuthenticated: boolean;
-    login: (token: string) => void;
+    isAdmin: boolean;
+    login: (token: string, user: AuthUser) => void;
     logout: () => void;
 }
 
+const USER_KEY = 'auth_user';
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({children}: { children: ReactNode }) {
-    const [token, setTokenState] = useState<string | null>(() => getToken());
+function getStoredUser(): AuthUser | null {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
 
-    const login = (newToken: string) => {
+function setStoredUser(user: AuthUser | null): void {
+    if (user) {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } else {
+        localStorage.removeItem(USER_KEY);
+    }
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [token, setTokenState] = useState<string | null>(() => getToken());
+    const [user, setUserState] = useState<AuthUser | null>(() => getStoredUser());
+
+    // Если токен есть, а user нет — загружаем /api/me
+    useEffect(() => {
+        if (token && !user) {
+            apiFetch<AuthUser>('/api/me')
+                .then((me) => {
+                    setUserState(me);
+                    setStoredUser(me);
+                })
+                .catch(() => {
+                    // Токен протух или невалидный — чистим
+                    removeToken();
+                    setStoredUser(null);
+                    setTokenState(null);
+                    setUserState(null);
+                });
+        }
+    }, [token, user]);
+
+    const login = (newToken: string, newUser: AuthUser) => {
         setToken(newToken);
         setTokenState(newToken);
+        setUserState(newUser);
+        setStoredUser(newUser);
     };
 
     const logout = () => {
         removeToken();
         setTokenState(null);
+        setUserState(null);
+        setStoredUser(null);
     };
+
+    const isAdmin = user?.roles.includes('ROLE_ADMIN') ?? false;
 
     return (
         <AuthContext.Provider
             value={{
                 token,
+                user,
                 isAuthenticated: !!token,
+                isAdmin,
                 login,
                 logout,
             }}

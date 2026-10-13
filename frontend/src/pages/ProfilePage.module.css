@@ -64,3 +64,19 @@
     border-radius: var(--radius-sm);
     text-align: center;
 }
+
+.success {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: var(--radius-sm);
+    color: #2e7d32;
+    font-size: 14px;
+    margin-bottom: var(--spacing-md);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
