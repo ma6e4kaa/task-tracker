@@ -2,6 +2,7 @@ import React from 'react';
 import {Link, NavLink, useNavigate} from 'react-router-dom';
 import {useAuth} from '../../context/AuthContext';
 import styles from './Header.module.css';
+import {Button} from "../ui/Button";
 
 export function Header() {
     const {isAuthenticated, isAdmin, user, logout} = useAuth();
@@ -34,9 +35,9 @@ export function Header() {
                     {isAuthenticated ? (
                         <>
                             <span className={styles.userEmail}>{user?.email ?? ''}</span>
-                            <button onClick={handleLogout} className={styles.logoutButton}>
+                            <Button variant={'secondary'} onClick={handleLogout}>
                                 Выйти
-                            </button>
+                            </Button>
                         </>
                     ) : (
                         <Link to="/login" className={styles.loginLink}>Войти</Link>

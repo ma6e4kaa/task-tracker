@@ -1,41 +1,104 @@
 .wrapper {
     padding: var(--spacing-xl) var(--spacing-lg);
-}
-
-.card {
-    max-width: 800px;
     margin: 0 auto;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-.title {
-    margin: 0;
-    font-size: 24px;
+.topNav {
+    margin-bottom: var(--spacing-md);
 }
 
 .backLink {
     color: var(--color-primary);
     text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.projectHeaderCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.headerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.title {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.editBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 8px 16px;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 99px;
     font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.editBtn:hover {
+    background: var(--color-border);
 }
 
 .description {
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: var(--spacing-xl);
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    margin: 0;
 }
 
 .meta {
     display: flex;
     gap: var(--spacing-lg);
-    font-size: 14px;
+    font-size: 15px;
     color: var(--color-text-muted);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--color-border);
+}
+
+.segmentedControl {
+    display: flex;
+    background: rgba(118, 118, 128, 0.12);
+    border-radius: 99px;
+    padding: 4px;
+    margin-bottom: var(--spacing-lg);
+    width: fit-content;
+}
+
+.segment {
+    background: transparent;
+    border: none;
+    padding: 8px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    border-radius: 99px;
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.activeSegment {
+    background: var(--color-surface);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tabContent {
+    /* Контейнер */
+}
+
+.emptyState {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-muted);
+    font-size: 15px;
 }

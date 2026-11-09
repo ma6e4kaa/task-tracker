@@ -36,12 +36,13 @@
     font-family: inherit;
     font-size: 14px;
     resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .textarea:focus {
     outline: none;
-    border-color: var(--color-border-focus);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
 }
 
 .error {

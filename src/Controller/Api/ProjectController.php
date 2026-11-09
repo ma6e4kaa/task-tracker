@@ -2,16 +2,20 @@
 
 namespace App\Controller\Api;
 
+use App\Dto\AddProjectMemberRequest;
 use App\Dto\CreateProjectRequest;
+use App\Dto\UpdateProjectMemberRequest;
 use App\Dto\UpdateProjectRequest;
 use App\Entity\Project;
 use App\Entity\ProjectMember;
 use App\Entity\User;
 use App\Repository\ProjectRepository;
+use App\Repository\UserRepository;
 use App\Security\Voter\ProjectVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -39,7 +43,7 @@ class ProjectController extends AbstractController
     #[Route('/api/projects', name: 'api_projects_create', methods: ['POST'])]
     public function create(
         #[MapRequestPayload] CreateProjectRequest $request,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface                    $entityManager,
     ): JsonResponse
     {
         $user = $this->getCurrentUser();
@@ -62,9 +66,9 @@ class ProjectController extends AbstractController
 
     #[Route('/api/projects/{id}', name: 'api_projects_update', methods: ['PATCH'])]
     public function update(
-        Project $project,
+        Project                                   $project,
         #[MapRequestPayload] UpdateProjectRequest $request,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface                    $entityManager,
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
@@ -83,13 +87,103 @@ class ProjectController extends AbstractController
 
     #[Route('/api/projects/{id}', name: 'api_projects_delete', methods: ['DELETE'])]
     public function delete(
-        Project $project,
+        Project                $project,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::DELETE, $project);
 
         $entityManager->remove($project);
+        $entityManager->flush();
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/api/projects/{id}/members', name: 'api_projects_members_list', methods: ['GET'])]
+    public function listMembers(Project $project): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
+
+        return $this->json($project->getMembers(), Response::HTTP_OK, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
+    }
+
+    #[Route('/api/projects/{id}/members', name: 'api_projects_members_add', methods: ['POST'])]
+    public function addMember(
+        Project $project,
+        #[MapRequestPayload] AddProjectMemberRequest $request,
+        EntityManagerInterface $entityManager,
+        UserRepository $userRepository
+    ): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::MANAGE_MEMBERS, $project);
+
+        $userToAdd = $userRepository->findOneBy(['email' => $request->email]);
+        if (!$userToAdd) {
+            return $this->json(['error' => 'Пользователь не найден'], Response::HTTP_NOT_FOUND);
+        }
+
+        foreach ($project->getMembers() as $member) {
+            if ($member->getUser()->getId() === $userToAdd->getId()) {
+                return $this->json(['error' => 'Пользователь уже в проекте'], Response::HTTP_CONFLICT);
+            }
+        }
+
+        $member = new ProjectMember();
+        $member->setUser($userToAdd);
+        $member->setRole($request->role);
+        $project->addMember($member);
+
+        $entityManager->flush();
+
+        return $this->json($member, Response::HTTP_CREATED, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
+    }
+
+    #[Route('/api/projects/{id}/members/{memberId}', name: 'api_projects_members_update', methods: ['PATCH'])]
+    public function updateMember(
+        Project $project,
+        int $memberId,
+        #[MapRequestPayload] UpdateProjectMemberRequest $request,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::MANAGE_MEMBERS, $project);
+
+        $member = $entityManager->getRepository(ProjectMember::class)->find($memberId);
+
+        if (!$member || $member->getProject() !== $project) {
+            return $this->json(['error' => 'Участник не найден'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($member->getUser()->getId() === $project->getOwner()->getId()) {
+            return $this->json(['error' => 'Нельзя менять роль владельца'], Response::HTTP_FORBIDDEN);
+        }
+
+        $member->setRole($request->role);
+        $entityManager->flush();
+
+        return $this->json($member, Response::HTTP_OK, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
+    }
+
+    #[Route('/api/projects/{id}/members/{memberId}', name: 'api_projects_members_delete', methods: ['DELETE'])]
+    public function deleteMember(
+        Project $project,
+        int $memberId,
+        EntityManagerInterface $entityManager,
+    ): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::MANAGE_MEMBERS, $project);
+
+        $member = $entityManager->getRepository(ProjectMember::class)->find($memberId);
+
+        if (!$member || $member->getProject() !== $project) {
+            return $this->json(['error' => 'Участник не найден'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($member->getUser()->getId() === $project->getOwner()->getId()) {
+            return $this->json(['error' => 'Нельзя удалить владельца'], Response::HTTP_FORBIDDEN);
+        }
+
+        $entityManager->remove($member);
         $entityManager->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);

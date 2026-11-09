@@ -1,0 +1,22 @@
+.emptyState {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-md);
+    color: var(--color-text-muted);
+}
+
+.icon {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.8;
+}
+
+.emptyState h3 {
+    color: var(--color-text);
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: 18px;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 15px;
+}
