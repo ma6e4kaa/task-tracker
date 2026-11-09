@@ -8,6 +8,7 @@ import styles from './UsersPage.module.css';
 interface User {
     id: number;
     email: string;
+    roles: Array<string>;
     isActive: boolean;
     createdAt: string;
 }
@@ -51,6 +52,7 @@ export function UsersPage() {
                         <tr>
                             <th>ID</th>
                             <th>Email</th>
+                            <th>Роли</th>
                             <th>Статус</th>
                             <th>Создан</th>
                             <th></th>
@@ -61,6 +63,7 @@ export function UsersPage() {
                             <tr key={user.id}>
                                 <td className={styles.idCell}>#{user.id}</td>
                                 <td>{user.email}</td>
+                                <td>{user.roles.join(', ')}</td>
                                 <td>
                                         <span
                                             className={

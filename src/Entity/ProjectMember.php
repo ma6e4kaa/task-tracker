@@ -30,6 +30,8 @@ class ProjectMember
     #[ORM\Column(length: 50)]
     private ?string $role = null;
 
+    public const ROLE_OWNER = 'owner';
+
     public function getId(): ?int
     {
         return $this->id;

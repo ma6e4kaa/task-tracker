@@ -1,0 +1,85 @@
+.wrapper {
+    padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin: 0 auto;
+}
+
+.projectLink {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.projectLink:hover {
+    transform: translateY(-2px);
+}
+
+.projectCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 0;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.projectLink:hover .projectCard {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.topRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.projectName {
+    margin: 0;
+    font-size: 18px;
+    color: var(--color-text);
+}
+
+.projectDesc {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ownerEmail {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: var(--spacing-xs);
+}
+
+.empty {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-text-muted);
+}

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import {Link, NavLink, useNavigate} from 'react-router-dom';
+import {useAuth} from '../../context/AuthContext';
 import styles from './Header.module.css';
 
 export function Header() {
-    const { isAuthenticated, isAdmin, user, logout } = useAuth();
+    const {isAuthenticated, isAdmin, user, logout} = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -12,7 +12,7 @@ export function Header() {
         navigate('/login');
     };
 
-    const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    const navLinkClass = ({isActive}: { isActive: boolean }) =>
         isActive ? `${styles.navLink} ${styles.active}` : styles.navLink;
 
     return (
@@ -22,13 +22,10 @@ export function Header() {
 
                 {isAuthenticated && (
                     <nav className={styles.nav}>
-                        <NavLink to="/profile" className={navLinkClass}>
-                            Профиль
-                        </NavLink>
+                        <NavLink to="/projects" className={navLinkClass}>Проекты</NavLink>
+                        <NavLink to="/profile" className={navLinkClass}>Профиль</NavLink>
                         {isAdmin && (
-                            <NavLink to="/users" className={navLinkClass}>
-                                Пользователи
-                            </NavLink>
+                            <NavLink to="/users" className={navLinkClass}>Пользователи</NavLink>
                         )}
                     </nav>
                 )}

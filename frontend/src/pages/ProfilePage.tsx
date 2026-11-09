@@ -95,11 +95,6 @@ export function ProfilePage() {
         }
     };
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
-
     if (loading) return <div className={styles.wrapper}><Card>Загрузка...</Card></div>;
     if (error) return <div className={styles.wrapper}><Card>Ошибка: {error}</Card></div>;
     if (!me) return null;
@@ -132,7 +127,7 @@ export function ProfilePage() {
                         <div className={styles.actions}>
                             <Button onClick={handleEdit}>Редактировать</Button>
                             <Button variant="danger" onClick={handleDeactivate}>
-                                Деактивировать
+                                Удалить аккаунт
                             </Button>
                         </div>
                     </>

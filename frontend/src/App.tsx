@@ -9,6 +9,9 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { AdminUserEditPage } from './pages/AdminUserEditPage';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { ProjectFormPage } from './pages/ProjectFormPage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 
 export default function App() {
     return (
@@ -30,6 +33,9 @@ export default function App() {
                         }
                     >
                         <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/projects" element={<ProjectsPage />} />
+                        <Route path="/projects/new" element={<ProjectFormPage />} />
+                        <Route path="/projects/:id" element={<ProjectDetailPage />} />
                     </Route>
 
                     {/* Только для админа */}

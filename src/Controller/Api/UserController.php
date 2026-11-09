@@ -23,7 +23,7 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser($userRepository);
 
-        return $this->json($user, 200, [], ['groups' => ['user:read']]);
+        return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
     #[Route('/api/me', name: 'api_me_update', methods: ['PATCH'])]
@@ -65,7 +65,7 @@ class UserController extends AbstractController
 
         $em->flush();
 
-        return $this->json($user, 200, [], ['groups' => ['user:read']]);
+        return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
     #[Route('/api/me', name: 'api_me_delete', methods: ['DELETE'])]
@@ -100,7 +100,7 @@ class UserController extends AbstractController
 
         $users = $qb->getQuery()->getResult();
 
-        return $this->json($users, 200, [], ['groups' => ['user:read']]);
+        return $this->json($users, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
     #[Route('/api/users/{id}', name: 'api_users_show', methods: ['GET'])]
@@ -113,7 +113,7 @@ class UserController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
-        return $this->json($user, 200, [], ['groups' => ['user:read']]);
+        return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
     #[Route('/api/users/{id}', name: 'api_users_update', methods: ['PATCH'])]
@@ -163,7 +163,7 @@ class UserController extends AbstractController
 
         $em->flush();
 
-        return $this->json($user, 200, [], ['groups' => ['user:read']]);
+        return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
     #[Route('/api/users/{id}', name: 'api_users_delete', methods: ['DELETE'])]

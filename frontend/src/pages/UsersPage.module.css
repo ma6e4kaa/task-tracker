@@ -1,11 +1,11 @@
 .wrapper {
-    min-height: 100vh;
+    min-height: 100%;
     padding: var(--spacing-xl) var(--spacing-lg);
     background: var(--color-bg);
 }
 
 .card {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 

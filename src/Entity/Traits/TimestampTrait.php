@@ -11,11 +11,11 @@ use Symfony\Component\Serializer\Attribute\Groups;
 trait TimestampTrait
 {
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'project:read'])]
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'project:read'])]
     private ?DateTimeImmutable $updatedAt = null;
 
     #[PrePersist]
