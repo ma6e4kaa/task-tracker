@@ -13,6 +13,8 @@ import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectFormPage } from './pages/ProjectFormPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { ProjectEditPage } from './pages/ProjectEditPage';
+import { TaskFormPage } from './pages/project/TaskFormPage';
+import { TaskDetailPage } from './pages/project/TaskDetailPage';
 
 export default function App() {
     return (
@@ -38,6 +40,9 @@ export default function App() {
                         <Route path="/projects/new" element={<ProjectFormPage />} />
                         <Route path="/projects/:id" element={<ProjectDetailPage />} />
                         <Route path="/projects/:id/edit" element={<ProjectEditPage />} />
+                        <Route path="/projects/:id/tasks/new" element={<TaskFormPage />} />
+                        <Route path="/projects/:id/tasks/:taskId" element={<TaskDetailPage />} />
+                        <Route path="/projects/:id/tasks/:taskId/edit" element={<TaskFormPage />} />
                     </Route>
 
                     {/* Только для админа */}

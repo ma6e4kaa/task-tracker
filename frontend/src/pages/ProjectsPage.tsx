@@ -26,9 +26,9 @@ export function ProjectsPage() {
         <div className={styles.wrapper}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Мои проекты</h1>
-                <Link to="/projects/new">
-                    <Button>Создать проект</Button>
-                </Link>
+                <Button to="/projects/new">
+                    Создать проект
+                </Button>
             </div>
 
             {projects && projects.length === 0 ? (

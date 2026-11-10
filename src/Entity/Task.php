@@ -10,28 +10,46 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[HasLifecycleCallbacks]
 class Task
 {
+    public const STATUS_TODO = 'todo';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_REVIEW = 'review';
+    public const STATUS_DONE = 'done';
+    public const STATUSES = [self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_REVIEW, self::STATUS_DONE];
+
+    public const PRIORITY_LOW = 'low';
+    public const PRIORITY_MEDIUM = 'medium';
+    public const PRIORITY_HIGH = 'high';
+    public const PRIORITY_CRITICAL = 'critical';
+    public const PRIORITIES = [self::PRIORITY_LOW, self::PRIORITY_MEDIUM, self::PRIORITY_HIGH, self::PRIORITY_CRITICAL];
+
     use TimestampTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['task:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['task:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['task:read'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['task:read'])]
     private ?string $status = null;
 
     #[ORM\Column(length: 20)]
+    #[Groups(['task:read'])]
     private ?string $priority = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
@@ -39,22 +57,27 @@ class Task
     private ?Project $project = null;
 
     #[ORM\ManyToOne(inversedBy: 'assignedTasks')]
+    #[Groups(['task:read:assignee'])]
     private ?User $assignee = null;
 
     #[ORM\ManyToOne(inversedBy: 'reportedTasks')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['task:read:reporter'])]
     private ?User $reporter = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['task:read'])]
     private ?DateTimeImmutable $dueDate = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['task:read'])]
     private ?DateTimeImmutable $completedAt = null;
 
     /**
      * @var Collection<int, Comment>
      */
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'task', orphanRemoval: true)]
+    #[Groups(['task:read:comments'])]
     private Collection $comments;
 
     /**
@@ -62,6 +85,7 @@ class Task
      */
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'tasks')]
     #[ORM\JoinTable(name: 'task_tags')]
+    #[Groups(['task:read:tags'])]
     private Collection $tags;
 
     public function __construct()

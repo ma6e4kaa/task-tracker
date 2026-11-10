@@ -2,8 +2,14 @@
     /* Colors */
     --color-primary: #007aff;
     --color-primary-hover: #0062cc;
+    --color-primary-bg: #e5f1ff;
+    --color-primary-border: #99c2ff;
     --color-error: #ff3b30;
     --color-error-hover: #d70015;
+    --color-success: #34c759;
+    --color-success-hover: #248a3d;
+    --color-success-bg: #e8f8ec;
+    --color-success-border: #a5e0b5;
     --color-error-bg: #ffe5e5;
     --color-error-border: #ffb3b3;
     --color-text: #1d1d1f;

@@ -60,16 +60,15 @@ export function ProjectDetailPage() {
                     <h1 className={styles.title}>{project.name}</h1>
                     {isOwner && (
                         <div className={styles.buttons}>
-                            <Link to={`/projects/${project.id}/edit`} className={styles.editBtn}
+                            <Button to={`/projects/${project.id}/edit`}
                                   title="Редактировать проект">
                                 <EditIcon />
                                 <span>Редактировать</span>
-                            </Link>
+                            </Button>
 
                             <Button
                                 variant={"danger"}
                                 onClick={handleDelete}
-                                className={styles.deleteBtn}
                                 title="Удалить проект"
                                 disabled={deleting}
                             >
@@ -108,7 +107,7 @@ export function ProjectDetailPage() {
             <div className={styles.tabContent}>
                 {activeTab === 'tasks' && (
                     <Card>
-                        <ProjectTasksTab/>
+                        <ProjectTasksTab projectId={project.id} />
                     </Card>
                 )}
 

@@ -19,6 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class UserController extends AbstractController
 {
     #[Route('/api/me', name: 'api_me', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function me(UserRepository $userRepository): JsonResponse
     {
         $user = $this->getCurrentUser($userRepository);
@@ -27,6 +28,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/me', name: 'api_me_update', methods: ['PATCH'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function updateMe(
         #[MapRequestPayload] UpdateProfileRequest $request,
         UserRepository                            $userRepository,
@@ -69,6 +71,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/me', name: 'api_me_delete', methods: ['DELETE'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function deleteMe(
         UserRepository         $userRepository,
         EntityManagerInterface $em,

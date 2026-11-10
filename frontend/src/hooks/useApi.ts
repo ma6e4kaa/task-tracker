@@ -9,15 +9,20 @@ interface UseApiResult<T> {
     loading: boolean;
 }
 
-export function useApi<T>(url: string): UseApiResult<T> {
+export function useApi<T>(url: string | null): UseApiResult<T> {
     const [data, setData] = useState<T | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!!url);
 
     const { logout } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!url) {
+            setLoading(false);
+            return;
+        }
+
         let cancelled = false;
 
         setLoading(true);

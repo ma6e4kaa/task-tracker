@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { apiFetch } from '../../api/client';
-import { useAuth } from '../../context/AuthContext';
-import { Input } from '../../components/ui/Input';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
+import React, {useState, useEffect} from 'react';
+import {apiFetch} from '../../api/client';
+import {useAuth} from '../../context/AuthContext';
+import {Input} from '../../components/ui/Input';
+import {Button} from '../../components/ui/Button';
+import {Modal} from '../../components/ui/Modal';
 import styles from './ProjectMembersTab.module.css';
-import { EditIcon, TrashIcon } from '../../components/icons';
+import {EditIcon, TrashIcon} from '../../components/icons';
+import {ActionButtons} from "../../components/ui/ActionButtons";
 
 interface User {
     id: number;
@@ -30,11 +31,11 @@ const ROLE_LABELS: Record<string, string> = {
     viewer: 'Наблюдатель',
 };
 
-export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
+export function ProjectMembersTab({projectId, ownerEmail}: Props) {
     const [members, setMembers] = useState<ProjectMember[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
-    const { user } = useAuth();
+    const {user} = useAuth();
     const isOwner = user?.email === ownerEmail;
 
     // Состояния модалок
@@ -57,7 +58,9 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
         }
     };
 
-    useEffect(() => { fetchMembers(); }, [projectId]);
+    useEffect(() => {
+        fetchMembers();
+    }, [projectId]);
 
     // Фильтрация по поиску
     const filteredMembers = members.filter(m =>
@@ -70,7 +73,7 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
         try {
             await apiFetch(`/api/projects/${projectId}/members`, {
                 method: 'POST',
-                body: JSON.stringify({ email: newEmail, role: newRole }),
+                body: JSON.stringify({email: newEmail, role: newRole}),
             });
             setNewEmail('');
             setIsAddModalOpen(false);
@@ -89,7 +92,7 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
         try {
             await apiFetch(`/api/projects/${projectId}/members/${editingMember.id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ role: editingMember.role }),
+                body: JSON.stringify({role: editingMember.role}),
             });
             setEditingMember(null);
             await fetchMembers();
@@ -103,7 +106,7 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
     const handleRemove = async (memberId: number) => {
         if (!window.confirm('Удалить участника?')) return;
         try {
-            await apiFetch(`/api/projects/${projectId}/members/${memberId}`, { method: 'DELETE' });
+            await apiFetch(`/api/projects/${projectId}/members/${memberId}`, {method: 'DELETE'});
             await fetchMembers();
         } catch (err) {
             alert('Ошибка удаления');
@@ -146,22 +149,8 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
                             <td>{ROLE_LABELS[member.role] || member.role}</td>
                             <td className={styles.textRight}>
                                 {isOwner && !isMemberOwner && (
-                                    <div className={styles.actions}>
-                                        <button
-                                            onClick={() => setEditingMember(member)}
-                                            className={styles.actionBtn}
-                                            title="Редактировать роль"
-                                        >
-                                            <EditIcon size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleRemove(member.id)}
-                                            className={styles.actionBtnDelete}
-                                            title="Удалить"
-                                        >
-                                            <TrashIcon size={18} />
-                                        </button>
-                                    </div>
+                                    <ActionButtons onEdit={() => setEditingMember(member)}
+                                                   onDelete={() => handleRemove(member.id)}/>
                                 )}
                             </td>
                         </tr>
@@ -194,7 +183,8 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
                         </select>
                     </div>
                     <div className={styles.modalActions}>
-                        <Button type="button" variant="danger" onClick={() => setIsAddModalOpen(false)}>Отменить</Button>
+                        <Button type="button" variant="danger"
+                                onClick={() => setIsAddModalOpen(false)}>Отменить</Button>
                         <Button type="submit" disabled={isSaving}>{isSaving ? 'Сохранение...' : 'Добавить'}</Button>
                     </div>
                 </form>
@@ -217,8 +207,10 @@ export function ProjectMembersTab({ projectId, ownerEmail }: Props) {
                             </select>
                         </div>
                         <div className={styles.modalActions}>
-                            <Button type="button" variant="danger" onClick={() => setEditingMember(null)}>Отменить</Button>
-                            <Button type="submit" disabled={isSaving}>{isSaving ? 'Сохранение...' : 'Сохранить'}</Button>
+                            <Button type="button" variant="danger"
+                                    onClick={() => setEditingMember(null)}>Отменить</Button>
+                            <Button type="submit"
+                                    disabled={isSaving}>{isSaving ? 'Сохранение...' : 'Сохранить'}</Button>
                         </div>
                     </form>
                 )}

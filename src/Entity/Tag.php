@@ -6,6 +6,7 @@ use App\Repository\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TagRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_TAG_NAME', fields: ['name'])]
@@ -14,12 +15,15 @@ class Tag
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['task:read:tags'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['task:read:tags'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 7, nullable: true)]
+    #[Groups(['task:read:tags'])]
     private ?string $color = null;
 
     /**
