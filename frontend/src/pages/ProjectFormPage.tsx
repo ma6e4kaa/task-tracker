@@ -59,7 +59,7 @@ export function ProjectFormPage() {
                         <Button type="submit" disabled={loading}>
                             {loading ? 'Создание...' : 'Создать'}
                         </Button>
-                        <Button type="button" variant="secondary" onClick={() => navigate('/projects')}>
+                        <Button type="button" variant="danger" onClick={() => navigate('/projects')}>
                             Отменить
                         </Button>
                     </div>

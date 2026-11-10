@@ -24,7 +24,6 @@ export function Header() {
                 {isAuthenticated && (
                     <nav className={styles.nav}>
                         <NavLink to="/projects" className={navLinkClass}>Проекты</NavLink>
-                        <NavLink to="/profile" className={navLinkClass}>Профиль</NavLink>
                         {isAdmin && (
                             <NavLink to="/users" className={navLinkClass}>Пользователи</NavLink>
                         )}
@@ -34,8 +33,8 @@ export function Header() {
                 <div className={styles.right}>
                     {isAuthenticated ? (
                         <>
-                            <span className={styles.userEmail}>{user?.email ?? ''}</span>
-                            <Button variant={'secondary'} onClick={handleLogout}>
+                            <NavLink to="/profile" className={navLinkClass}>{user?.email ?? ''}</NavLink>
+                            <Button variant={'danger'} onClick={handleLogout}>
                                 Выйти
                             </Button>
                         </>

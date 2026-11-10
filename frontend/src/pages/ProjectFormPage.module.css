@@ -55,3 +55,7 @@
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
 }
+
+input {
+    width: auto !important;
+}

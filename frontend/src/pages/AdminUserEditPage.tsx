@@ -130,10 +130,10 @@ export function AdminUserEditPage() {
                         </Button>
                         <Button
                             type="button"
-                            variant="secondary"
+                            variant="danger"
                             onClick={() => navigate('/users')}
                         >
-                            Отмена
+                            Отменить
                         </Button>
                     </div>
                 </form>

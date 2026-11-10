@@ -1,5 +1,6 @@
 import React, { ReactNode, useEffect } from 'react';
 import styles from './Modal.module.css';
+import { CloseIcon } from '../icons';
 
 interface ModalProps {
     isOpen: boolean;
@@ -21,7 +22,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2>{title}</h2>
-                    <button onClick={onClose} className={styles.closeBtn}>&times;</button>
+                    <button onClick={onClose} className={styles.closeBtn}>
+                        <CloseIcon size={24} />
+                    </button>
                 </div>
                 <div className={styles.content}>
                     {children}

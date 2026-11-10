@@ -163,8 +163,8 @@ export function ProfilePage() {
                             <Button type="submit" disabled={saving}>
                                 {saving ? 'Сохранение...' : 'Сохранить'}
                             </Button>
-                            <Button type="button" variant="secondary" onClick={handleCancel}>
-                                Отмена
+                            <Button type="button" variant="danger" onClick={handleCancel}>
+                                Отменить
                             </Button>
                         </div>
                     </form>

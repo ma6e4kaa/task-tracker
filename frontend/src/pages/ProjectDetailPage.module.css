@@ -34,7 +34,7 @@
     letter-spacing: -0.5px;
 }
 
-.editBtn {
+.editBtn, .deleteBtn {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -46,10 +46,24 @@
     font-weight: 500;
     text-decoration: none;
     transition: background 0.2s;
+    background: transparent;
+    font-family: inherit;
 }
 
 .editBtn:hover {
-    background: var(--color-border);
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.deleteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.buttons {
+    display: flex;
+    gap: 5px;
 }
 
 .description {
@@ -93,7 +107,7 @@
 }
 
 .tabContent {
-    /* Контейнер */
+
 }
 
 .emptyState {

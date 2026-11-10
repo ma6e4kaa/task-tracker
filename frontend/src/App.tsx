@@ -12,6 +12,7 @@ import { AdminUserEditPage } from './pages/AdminUserEditPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectFormPage } from './pages/ProjectFormPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
+import { ProjectEditPage } from './pages/ProjectEditPage';
 
 export default function App() {
     return (
@@ -36,6 +37,7 @@ export default function App() {
                         <Route path="/projects" element={<ProjectsPage />} />
                         <Route path="/projects/new" element={<ProjectFormPage />} />
                         <Route path="/projects/:id" element={<ProjectDetailPage />} />
+                        <Route path="/projects/:id/edit" element={<ProjectEditPage />} />
                     </Route>
 
                     {/* Только для админа */}

@@ -10,34 +10,27 @@
 }
 
 .button:active {
-    transform: scale(0.97); /* Эффект нажатия */
+    transform: scale(0.97);
 }
 
 .primary {
-    background: var(--color-primary);
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    border: 1px solid var(--color-border);
+    background: transparent;
 }
 
 .primary:hover:not(:disabled) {
-    background: var(--color-primary-hover);
-    box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+    border: 1px solid var(--color-primary-hover);
+    color: var(--color-primary-hover);
+    background: rgba(0, 122, 255, 0.1);
 }
 
 .danger {
-    background: var(--color-error);
-    color: white;
+    border: 1px solid var(--color-border);
+    background: transparent;
 }
 
 .danger:hover:not(:disabled) {
-    background: var(--color-error-hover);
-}
-
-.secondary {
-    background: var(--color-bg);
-    color: var(--color-primary);
-}
-
-.secondary:hover:not(:disabled) {
-    background: #e5e5ea;
+    border: 1px solid var(--color-error-hover);
+    color: var(--color-error-hover);
+    background: rgba(255, 59, 48, 0.1);
 }
