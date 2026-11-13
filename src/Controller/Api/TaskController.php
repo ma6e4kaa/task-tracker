@@ -5,9 +5,11 @@ namespace App\Controller\Api;
 use App\Dto\CreateTaskRequest;
 use App\Dto\UpdateTaskRequest;
 use App\Dto\UpdateTaskStatusRequest;
+use App\Dto\UpdateTaskTagsRequest;
 use App\Entity\Project;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Repository\TagRepository;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\ProjectVoter;
@@ -177,6 +179,38 @@ class TaskController extends AbstractController
             $task->setCompletedAt(new \DateTimeImmutable());
         } else {
             $task->setCompletedAt(null);
+        }
+
+        $em->flush();
+
+        return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
+    }
+
+    #[Route('/api/projects/{projectId}/tasks/{taskId}/tags', name: 'api_tasks_tags_update', methods: ['PATCH'])]
+    public function updateTags(
+        #[MapEntity(id: 'projectId')] Project $project,
+        #[MapEntity(id: 'taskId')] Task $task,
+        #[MapRequestPayload] UpdateTaskTagsRequest $request,
+        EntityManagerInterface $em,
+        TagRepository $tagRepository
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
+        if ($task->getProject() !== $project) throw $this->createNotFoundException();
+
+        // Менять теги задачи может тот, кто может её редактировать
+        $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
+
+        // 1. Сначала удаляем все текущие теги
+        foreach ($task->getTags() as $existingTag) {
+            $task->removeTag($existingTag);
+        }
+
+        // 2. Добавляем новые (если они есть)
+        if (!empty($request->tagIds)) {
+            $newTags = $tagRepository->findBy(['id' => $request->tagIds]);
+            foreach ($newTags as $tag) {
+                $task->addTag($tag);
+            }
         }
 
         $em->flush();

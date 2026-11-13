@@ -121,3 +121,34 @@
     font-size: 13px;
     color: var(--color-text-muted);
 }
+
+.editTagsBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+}
+.editTagsBtn:hover {
+    background: var(--color-bg);
+    color: var(--color-primary);
+}
+
+.tagsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tagChip {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.noTags {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}

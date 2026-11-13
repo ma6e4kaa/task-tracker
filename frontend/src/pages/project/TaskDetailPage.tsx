@@ -9,6 +9,8 @@ import {Button} from "../../components/ui/Button";
 import {useAuth} from '../../context/AuthContext';
 import {StatusBadge} from '../../components/ui/StatusBadge';
 import {PriorityBadge} from '../../components/ui/PriorityBadge';
+import {TagIcon} from '../../components/icons';
+import {TaskTagsModal} from './TaskTagsModal';
 
 const STATUS_LABELS: Record<string, string> = {
     todo: 'К выполнению',
@@ -31,6 +33,8 @@ export function TaskDetailPage() {
     const {user, isAdmin} = useAuth();
     const [deleting, setDeleting] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
+    const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+    const handleTagsUpdate = () => window.location.reload();
 
     const handleDelete = async () => {
         if (!window.confirm('Удалить задачу?')) return;
@@ -135,6 +139,41 @@ export function TaskDetailPage() {
 
                         <div className={styles.metaList}>
                             <div className={styles.metaItem}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '8px'
+                                }}>
+                                    <span className={styles.label}>Теги</span>
+                                    {canEdit && (
+                                        <button onClick={() => setIsTagsModalOpen(true)} className={styles.editTagsBtn}
+                                                title="Изменить теги">
+                                            <TagIcon size={16}/>
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className={styles.tagsContainer}>
+                                    {task.tags && task.tags.length > 0 ? (
+                                        task.tags.map((tag: any) => (
+                                            <span
+                                                key={tag.id}
+                                                className={styles.tagChip}
+                                                style={{
+                                                    backgroundColor: tag.color || 'var(--color-bg)',
+                                                    color: tag.color ? '#fff' : 'inherit'
+                                                }}
+                                            >
+                                                {tag.name}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className={styles.noTags}>Нет тегов</span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className={styles.metaItem}>
                                 <span className={styles.label}>Статус</span>
                                 <StatusBadge status={task.status}/>
                             </div>
@@ -176,6 +215,16 @@ export function TaskDetailPage() {
                     </Card>
                 </div>
             </div>
+            {task && (
+                <TaskTagsModal
+                    isOpen={isTagsModalOpen}
+                    onClose={() => setIsTagsModalOpen(false)}
+                    taskId={task.id}
+                    projectId={Number(id)}
+                    currentTags={task.tags || []}
+                    onSave={handleTagsUpdate}
+                />
+            )}
         </div>
     );
 }
