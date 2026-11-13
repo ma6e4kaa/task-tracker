@@ -1,0 +1,29 @@
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    width: min-content;
+}
+
+.todo {
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+}
+
+.in_progress {
+    background: var(--color-primary-bg);
+    color: var(--color-primary);
+}
+
+.review {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.done {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}

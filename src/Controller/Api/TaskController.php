@@ -4,12 +4,14 @@ namespace App\Controller\Api;
 
 use App\Dto\CreateTaskRequest;
 use App\Dto\UpdateTaskRequest;
+use App\Dto\UpdateTaskStatusRequest;
 use App\Entity\Project;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\ProjectVoter;
+use App\Security\Voter\TaskVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -54,8 +56,6 @@ class TaskController extends AbstractController
         UserRepository                         $userRepository
     ): JsonResponse
     {
-        $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
-
         $user = $this->getUser();
         if (!$user instanceof User) throw $this->createAccessDeniedException();
 
@@ -110,6 +110,8 @@ class TaskController extends AbstractController
         $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
+        $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
+
         if ($request->title !== null) $task->setTitle($request->title);
         if ($request->description !== null) $task->setDescription($request->description);
         if ($request->priority !== null) $task->setPriority($request->priority);
@@ -146,12 +148,39 @@ class TaskController extends AbstractController
         EntityManagerInterface                $em
     ): JsonResponse
     {
-        $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
+        $this->denyAccessUnlessGranted(ProjectVoter::DELETE, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
+
+        $this->denyAccessUnlessGranted(TaskVoter::DELETE, $task);
 
         $em->remove($task);
         $em->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/api/projects/{projectId}/tasks/{taskId}/status', name: 'api_tasks_status_update', methods: ['PATCH'])]
+    public function updateStatus(
+        #[MapEntity(id: 'projectId')] Project $project,
+        #[MapEntity(id: 'taskId')] Task $task,
+        #[MapRequestPayload] UpdateTaskStatusRequest $request,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
+        if ($task->getProject() !== $project) throw $this->createNotFoundException();
+
+        $this->denyAccessUnlessGranted(TaskVoter::CHANGE_STATUS, $task);
+
+        $task->setStatus($request->status);
+
+        if ($request->status === Task::STATUS_DONE) {
+            $task->setCompletedAt(new \DateTimeImmutable());
+        } else {
+            $task->setCompletedAt(null);
+        }
+
+        $em->flush();
+
+        return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
     }
 }

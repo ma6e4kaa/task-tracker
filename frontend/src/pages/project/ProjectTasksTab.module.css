@@ -33,18 +33,6 @@
     text-align: right;
 }
 
-.statusBadge {
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 99px;
-    font-weight: 500;
-}
-
-.todo { background: #f5f5f7; color: #86868b; }
-.in_progress { background: rgba(0, 122, 255, 0.1); color: var(--color-primary); }
-.review { background: rgba(255, 149, 0, 0.1); color: #ff9500; }
-.done { background: rgba(52, 199, 89, 0.1); color: #34c759; }
-
 .emptyState {
     text-align: center;
     color: var(--color-text-muted);

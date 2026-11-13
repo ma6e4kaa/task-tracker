@@ -4,14 +4,22 @@
     --color-primary-hover: #0062cc;
     --color-primary-bg: #e5f1ff;
     --color-primary-border: #99c2ff;
+
     --color-error: #ff3b30;
     --color-error-hover: #d70015;
+    --color-error-bg: #ffe5e5;
+    --color-error-border: #ffb3b3;
+
     --color-success: #34c759;
     --color-success-hover: #248a3d;
     --color-success-bg: #e8f8ec;
     --color-success-border: #a5e0b5;
-    --color-error-bg: #ffe5e5;
-    --color-error-border: #ffb3b3;
+    
+    --color-warning: #ff9500;
+    --color-warning-hover: #c93400;
+    --color-warning-bg: #fff4e5;
+    --color-warning-border: #ffcc80;
+
     --color-text: #1d1d1f;
     --color-text-muted: #86868b;
     --color-bg: #f5f5f7;

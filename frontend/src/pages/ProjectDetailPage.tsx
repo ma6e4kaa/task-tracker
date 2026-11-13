@@ -107,7 +107,7 @@ export function ProjectDetailPage() {
             <div className={styles.tabContent}>
                 {activeTab === 'tasks' && (
                     <Card>
-                        <ProjectTasksTab projectId={project.id} />
+                        <ProjectTasksTab projectId={project.id} ownerEmail={project.owner.email} />
                     </Card>
                 )}
 

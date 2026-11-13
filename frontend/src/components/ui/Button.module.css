@@ -13,6 +13,7 @@
     transition: background 0.2s;
     background: transparent;
     font-family: inherit;
+    justify-content: center;
 }
 
 .button:active {

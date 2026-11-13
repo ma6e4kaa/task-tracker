@@ -4,8 +4,8 @@ import styles from './ActionButtons.module.css';
 
 interface Props {
     onView?: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
 }
 
 export function ActionButtons({ onView, onEdit, onDelete }: Props) {
@@ -16,12 +16,16 @@ export function ActionButtons({ onView, onEdit, onDelete }: Props) {
                     <EyeIcon size={18} />
                 </button>
             )}
-            <button onClick={onEdit} className={styles.actionBtn} title="Редактировать">
-                <EditIcon size={18} />
-            </button>
-            <button onClick={onDelete} className={styles.actionBtnDelete} title="Удалить">
-                <TrashIcon size={18} />
-            </button>
+            {onEdit && (
+                <button onClick={onEdit} className={styles.actionBtn} title="Редактировать">
+                    <EditIcon size={18} />
+                </button>
+            )}
+            {onDelete && (
+                <button onClick={onDelete} className={styles.actionBtnDelete} title="Удалить">
+                    <TrashIcon size={18} />
+                </button>
+            )}
         </div>
     );
 }

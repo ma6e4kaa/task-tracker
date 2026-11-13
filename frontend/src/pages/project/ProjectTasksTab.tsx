@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import {Link, useNavigate} from 'react-router-dom';
-import { apiFetch } from '../../api/client';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { ActionButtons } from '../../components/ui/ActionButtons';
+import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {apiFetch} from '../../api/client';
+import {Button} from '../../components/ui/Button';
+import {Input} from '../../components/ui/Input';
+import {ActionButtons} from '../../components/ui/ActionButtons';
 import styles from './ProjectTasksTab.module.css';
+import {useAuth} from '../../context/AuthContext';
+import {StatusBadge} from '../../components/ui/StatusBadge';
+import {PriorityBadge} from '../../components/ui/PriorityBadge';
 
 interface Task {
     id: number;
     title: string;
     status: string;
     priority: string;
+    reporter: { id: number; email: string };
     assignee: { id: number; email: string } | null;
 }
 
 interface Props {
     projectId: number;
+    ownerEmail: string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -25,11 +30,14 @@ const STATUS_LABELS: Record<string, string> = {
     done: 'Готово'
 };
 
-export function ProjectTasksTab({ projectId }: Props) {
+export function ProjectTasksTab({projectId, ownerEmail}: Props) {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
+
+    const {user, isAdmin} = useAuth();
     const navigate = useNavigate();
+    const isProjectOwner = user?.email === ownerEmail;
 
     useEffect(() => {
         apiFetch<Task[]>(`/api/projects/${projectId}/tasks`)
@@ -44,7 +52,7 @@ export function ProjectTasksTab({ projectId }: Props) {
 
     const handleDelete = async (id: number) => {
         if (window.confirm('Удалить задачу?')) {
-            await apiFetch(`/api/projects/${projectId}/tasks/${id}`, { method: 'DELETE' });
+            await apiFetch(`/api/projects/${projectId}/tasks/${id}`, {method: 'DELETE'});
             apiFetch<Task[]>(`/api/projects/${projectId}/tasks`).then(setTasks);
         }
     };
@@ -79,25 +87,30 @@ export function ProjectTasksTab({ projectId }: Props) {
                 </tr>
                 </thead>
                 <tbody>
-                {filteredTasks.map(task => (
-                    <tr key={task.id}>
-                        <td>{task.title}</td>
-                        <td>
-                                <span className={`${styles.statusBadge} ${styles[task.status]}`}>
-                                    {STATUS_LABELS[task.status] || task.status}
-                                </span>
-                        </td>
-                        <td>{task.priority}</td>
-                        <td>{task.assignee ? task.assignee.email : ''}</td>
-                        <td className={styles.textRight}>
-                            <ActionButtons
-                                onView={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
-                                onEdit={() => navigate(`/projects/${projectId}/tasks/${task.id}/edit`)}
-                                onDelete={() => handleDelete(task.id)}
-                            />
-                        </td>
-                    </tr>
-                ))}
+                {filteredTasks.map(task => {
+                    // Проверяем права на редактирование КОНКРЕТНОЙ задачи
+                    const canEdit = isAdmin || isProjectOwner || task.reporter?.email === user?.email;
+
+                    return (
+                        <tr key={task.id}>
+                            <td>{task.title}</td>
+                            <td>
+                                <StatusBadge status={task.status}/>
+                            </td>
+                            <td>
+                                <PriorityBadge priority={task.priority}/>
+                            </td>
+                            <td>{task.assignee ? task.assignee.email : ''}</td>
+                            <td className={styles.textRight}>
+                                <ActionButtons
+                                    onView={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
+                                    onEdit={canEdit ? () => navigate(`/projects/${projectId}/tasks/${task.id}/edit`) : undefined}
+                                    onDelete={canEdit ? () => handleDelete(task.id) : undefined}
+                                />
+                            </td>
+                        </tr>
+                    );
+                })}
                 {filteredTasks.length === 0 && (
                     <tr>
                         <td colSpan={5} className={styles.emptyState}>Задачи не найдены</td>

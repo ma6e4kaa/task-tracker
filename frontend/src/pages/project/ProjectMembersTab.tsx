@@ -35,8 +35,9 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
     const [members, setMembers] = useState<ProjectMember[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
-    const {user} = useAuth();
+    const {user, isAdmin} = useAuth();
     const isOwner = user?.email === ownerEmail;
+    const canManage = isOwner || isAdmin;
 
     // Состояния модалок
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -127,7 +128,7 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                {isOwner && (
+                {canManage && (
                     <Button onClick={() => setIsAddModalOpen(true)}>Добавить участника</Button>
                 )}
             </div>
@@ -137,7 +138,7 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
                 <tr>
                     <th>Email</th>
                     <th>Роль</th>
-                    <th className={styles.textRight}>Действия</th>
+                    {canManage && <th className={styles.textRight}>Действия</th>}
                 </tr>
                 </thead>
                 <tbody>
@@ -147,18 +148,24 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
                         <tr key={member.id}>
                             <td>{member.user.email}</td>
                             <td>{ROLE_LABELS[member.role] || member.role}</td>
-                            <td className={styles.textRight}>
-                                {isOwner && !isMemberOwner && (
-                                    <ActionButtons onEdit={() => setEditingMember(member)}
-                                                   onDelete={() => handleRemove(member.id)}/>
-                                )}
-                            </td>
+                            {canManage && (
+                                <td className={styles.textRight}>
+                                    {!isMemberOwner && (
+                                        <ActionButtons
+                                            onEdit={() => setEditingMember(member)}
+                                            onDelete={() => handleRemove(member.id)}
+                                        />
+                                    )}
+                                </td>
+                            )}
                         </tr>
                     );
                 })}
                 {filteredMembers.length === 0 && (
                     <tr>
-                        <td colSpan={3} className={styles.emptyState}>Участники не найдены</td>
+                        <td colSpan={canManage ? 3 : 2} className={styles.emptyState}>
+                            Участники не найдены
+                        </td>
                     </tr>
                 )}
                 </tbody>
