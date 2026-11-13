@@ -1,0 +1,116 @@
+.sectionTitle {
+    font-size: 18px;
+    margin: 0 0 var(--spacing-lg) 0;
+}
+
+.addForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+    margin-top: var(--spacing-lg);
+}
+
+.textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    background: var(--color-surface);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.comment {
+    background: var(--color-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+.commentHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+    font-size: 13px;
+}
+
+.author {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.date {
+    color: var(--color-text-muted);
+}
+
+.commentBody {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+}
+
+.content {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    flex: 1;
+}
+
+.actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.comment:hover .actions {
+    opacity: 1; /* Кнопки проявляются при наведении на комментарий */
+}
+
+.actionBtn, .actionBtnDelete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+}
+
+.actionBtn:hover { color: var(--color-primary); background: rgba(0,122,255,0.1); }
+.actionBtnDelete:hover { color: var(--color-error); background: rgba(255,59,48,0.1); }
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.editActions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.empty {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    font-style: italic;
+}

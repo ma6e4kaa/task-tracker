@@ -11,6 +11,7 @@ import {StatusBadge} from '../../components/ui/StatusBadge';
 import {PriorityBadge} from '../../components/ui/PriorityBadge';
 import {TagIcon} from '../../components/icons';
 import {TaskTagsModal} from './TaskTagsModal';
+import {TaskComments} from "./TaskComments";
 
 const STATUS_LABELS: Record<string, string> = {
     todo: 'К выполнению',
@@ -130,6 +131,9 @@ export function TaskDetailPage() {
                                 </>
                             )}
                         </div>
+                    </Card>
+                    <Card>
+                        <TaskComments projectId={id as string} taskId={taskId as string} />
                     </Card>
                 </div>
 
