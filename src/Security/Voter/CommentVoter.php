@@ -4,11 +4,14 @@ namespace App\Security\Voter;
 
 use App\Entity\Comment;
 use App\Entity\User;
+use App\Security\Voter\Trait\AdminCheckTrait;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class CommentVoter extends Voter
 {
+    use AdminCheckTrait;
+
     public const EDIT = 'COMMENT_EDIT';
     public const DELETE = 'COMMENT_DELETE';
 
@@ -53,7 +56,7 @@ class CommentVoter extends Voter
 
     private function canDelete(Comment $comment, User $user): bool
     {
-        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+        if ($this->isAdmin($user)) {
             return true;
         }
 

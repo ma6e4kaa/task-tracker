@@ -32,7 +32,7 @@ class ActivityLog
     private ?string $action = null;
 
     #[ORM\Column(nullable: true)]
-    private ?array $changes = [];
+    private ?array $changes = null;
 
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt = null;

@@ -27,6 +27,18 @@ class UserController extends AbstractController
         return $this->json($user, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
 
+    private function getCurrentUser(UserRepository $userRepository): User
+    {
+        $identifier = $this->getUser()->getUserIdentifier();
+        $user = $userRepository->findByEmail($identifier);
+
+        if (!$user) {
+            throw $this->createNotFoundException('Current user not found');
+        }
+
+        return $user;
+    }
+
     #[Route('/api/me', name: 'api_me_update', methods: ['PATCH'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function updateMe(
@@ -39,7 +51,7 @@ class UserController extends AbstractController
         $user = $this->getCurrentUser($userRepository);
 
         if ($request->email !== null && $request->email !== $user->getEmail()) {
-            $existing = $userRepository->findOneBy(['email' => $request->email]);
+            $existing = $userRepository->findByEmail($request->email);
             if ($existing) {
                 return $this->json(
                     ['error' => 'email_taken', 'message' => 'Этот email уже занят'],
@@ -81,7 +93,7 @@ class UserController extends AbstractController
         $user->setIsActive(false);
         $em->flush();
 
-        return $this->json(null, Response::HTTP_NO_CONTENT); // 204
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/api/users', name: 'api_users_list', methods: ['GET'])]
@@ -92,16 +104,7 @@ class UserController extends AbstractController
     ): JsonResponse
     {
         $search = $request->query->get('search', '');
-
-        $qb = $userRepository->createQueryBuilder('u')
-            ->orderBy('u.id', 'ASC');
-
-        if ($search) {
-            $qb->andWhere('u.email LIKE :search')
-                ->setParameter('search', '%' . $search . '%');
-        }
-
-        $users = $qb->getQuery()->getResult();
+        $users = $userRepository->searchByEmail($search);
 
         return $this->json($users, Response::HTTP_OK, [], ['groups' => ['user:read']]);
     }
@@ -133,9 +136,8 @@ class UserController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
-        // Email
         if ($request->email !== null && $request->email !== $user->getEmail()) {
-            $existing = $userRepository->findOneBy(['email' => $request->email]);
+            $existing = $userRepository->findByEmail($request->email);
             if ($existing) {
                 return $this->json(
                     ['error' => 'email_taken', 'message' => 'Этот email уже занят'],
@@ -145,9 +147,7 @@ class UserController extends AbstractController
             $user->setEmail($request->email);
         }
 
-        // Roles — только админ
         if ($request->roles !== null) {
-            // Валидация: разрешены только ROLE_USER и ROLE_ADMIN
             $allowed = ['ROLE_USER', 'ROLE_ADMIN'];
             $invalid = array_diff($request->roles, $allowed);
             if (!empty($invalid)) {
@@ -159,7 +159,6 @@ class UserController extends AbstractController
             $user->setRoles($request->roles);
         }
 
-        // isActive — блокировка
         if ($request->isActive !== null) {
             $user->setIsActive($request->isActive);
         }
@@ -182,7 +181,6 @@ class UserController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
-        // Админ не может деактивировать сам себя
         if ($user === $this->getCurrentUser($userRepository)) {
             return $this->json(
                 ['error' => 'cannot_delete_self', 'message' => 'Нельзя деактивировать свой аккаунт через админ-панель'],
@@ -194,17 +192,5 @@ class UserController extends AbstractController
         $em->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
-    }
-
-    private function getCurrentUser(UserRepository $userRepository): User
-    {
-        $identifier = $this->getUser()->getUserIdentifier();
-        $user = $userRepository->findOneBy(['email' => $identifier]);
-
-        if (!$user) {
-            throw $this->createNotFoundException('Current user not found');
-        }
-
-        return $user;
     }
 }

@@ -23,13 +23,14 @@ class CommentController extends AbstractController
     #[Route('/api/projects/{projectId}/tasks/{taskId}/comments', name: 'api_comments_list', methods: ['GET'])]
     public function list(
         #[MapEntity(id: 'projectId')] Project $project,
-        #[MapEntity(id: 'taskId')] Task $task,
-        CommentRepository $commentRepository
-    ): JsonResponse {
+        #[MapEntity(id: 'taskId')] Task       $task,
+        CommentRepository                     $commentRepository
+    ): JsonResponse
+    {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
-        $comments = $commentRepository->findBy(['task' => $task], ['createdAt' => 'ASC']);
+        $comments = $commentRepository->findByTask($task);
 
         return $this->json($comments, 200, [], [
             'groups' => ['task:read:comments', 'task:read:comments:author']
@@ -39,10 +40,11 @@ class CommentController extends AbstractController
     #[Route('/api/projects/{projectId}/tasks/{taskId}/comments', name: 'api_comments_create', methods: ['POST'])]
     public function create(
         #[MapEntity(id: 'projectId')] Project $project,
-        #[MapEntity(id: 'taskId')] Task $task,
-        #[MapRequestPayload] CommentRequest $request,
-        EntityManagerInterface $em
-    ): JsonResponse {
+        #[MapEntity(id: 'taskId')] Task       $task,
+        #[MapRequestPayload] CommentRequest   $request,
+        EntityManagerInterface                $em
+    ): JsonResponse
+    {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
@@ -64,10 +66,11 @@ class CommentController extends AbstractController
 
     #[Route('/api/comments/{id}', name: 'api_comments_update', methods: ['PATCH'])]
     public function update(
-        #[MapEntity(id: 'id')] Comment $comment,
+        #[MapEntity(id: 'id')] Comment      $comment,
         #[MapRequestPayload] CommentRequest $request,
-        EntityManagerInterface $em
-    ): JsonResponse {
+        EntityManagerInterface              $em
+    ): JsonResponse
+    {
         $this->denyAccessUnlessGranted(CommentVoter::EDIT, $comment);
 
         $comment->setContent($request->content);
@@ -81,8 +84,9 @@ class CommentController extends AbstractController
     #[Route('/api/comments/{id}', name: 'api_comments_delete', methods: ['DELETE'])]
     public function delete(
         #[MapEntity(id: 'id')] Comment $comment,
-        EntityManagerInterface $em
-    ): JsonResponse {
+        EntityManagerInterface         $em
+    ): JsonResponse
+    {
         $this->denyAccessUnlessGranted(CommentVoter::DELETE, $comment);
 
         $em->remove($comment);

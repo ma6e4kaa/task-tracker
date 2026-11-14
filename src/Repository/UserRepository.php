@@ -20,6 +20,31 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
+     * Поиск пользователей по email (для админки)
+     * @return User[]
+     */
+    public function searchByEmail(string $search = ''): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->orderBy('u.id', 'ASC');
+
+        if ($search) {
+            $qb->andWhere('u.email LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Найти юзера по email (для получения текущего юзера)
+     */
+    public function findByEmail(string $email): ?User
+    {
+        return $this->findOneBy(['email' => $email]);
+    }
+
+    /**
      * Used to upgrade (rehash) the user's password automatically over time.
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
@@ -32,29 +57,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
-
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

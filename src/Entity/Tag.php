@@ -73,21 +73,4 @@ class Tag
     {
         return $this->tasks;
     }
-
-    public function addTask(Task $task): static
-    {
-        if (!$this->tasks->contains($task)) {
-            $this->tasks->add($task);
-            $task->addTag($this);
-        }
-        return $this;
-    }
-
-    public function removeTask(Task $task): static
-    {
-        if ($this->tasks->removeElement($task)) {
-            $task->removeTag($this);
-        }
-        return $this;
-    }
 }

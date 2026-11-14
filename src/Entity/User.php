@@ -172,7 +172,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Deprecated]
     public function eraseCredentials(): void
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
     }
 
     public function isActive(): bool
@@ -183,7 +182,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
-
         return $this;
     }
 
@@ -195,56 +193,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->projects;
     }
 
-    public function addProjects(Project $project): static
-    {
-        if (!$this->projects->contains($project)) {
-            $this->projects->add($project);
-            $project->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProjects(Project $project): static
-    {
-        if ($this->projects->removeElement($project)) {
-            // set the owning side to null (unless already changed)
-            if ($project->getOwner() === $this) {
-                $project->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, ProjectMember>
      */
     public function getProjectMembers(): Collection
     {
         return $this->projectMembers;
-    }
-
-    public function addProjectMember(ProjectMember $projectMember): static
-    {
-        if (!$this->projectMembers->contains($projectMember)) {
-            $this->projectMembers->add($projectMember);
-            $projectMember->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProjectMember(ProjectMember $projectMember): static
-    {
-        if ($this->projectMembers->removeElement($projectMember)) {
-            // set the owning side to null (unless already changed)
-            if ($projectMember->getUser() === $this) {
-                $projectMember->setUser(null);
-            }
-        }
-
-        return $this;
     }
 
     /**
@@ -255,56 +209,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->assignedTasks;
     }
 
-    public function addAssignedTask(Task $assignedTask): static
-    {
-        if (!$this->assignedTasks->contains($assignedTask)) {
-            $this->assignedTasks->add($assignedTask);
-            $assignedTask->setAssignee($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAssignedTask(Task $assignedTask): static
-    {
-        if ($this->assignedTasks->removeElement($assignedTask)) {
-            // set the owning side to null (unless already changed)
-            if ($assignedTask->getAssignee() === $this) {
-                $assignedTask->setAssignee(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Task>
      */
     public function getReportedTasks(): Collection
     {
         return $this->reportedTasks;
-    }
-
-    public function addReportedTask(Task $reportedTask): static
-    {
-        if (!$this->reportedTasks->contains($reportedTask)) {
-            $this->reportedTasks->add($reportedTask);
-            $reportedTask->setReporter($this);
-        }
-
-        return $this;
-    }
-
-    public function removeReportedTask(Task $reportedTask): static
-    {
-        if ($this->reportedTasks->removeElement($reportedTask)) {
-            // set the owning side to null (unless already changed)
-            if ($reportedTask->getReporter() === $this) {
-                $reportedTask->setReporter(null);
-            }
-        }
-
-        return $this;
     }
 
     /**
@@ -315,55 +225,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->comments;
     }
 
-    public function addComment(Comment $comment): static
-    {
-        if (!$this->comments->contains($comment)) {
-            $this->comments->add($comment);
-            $comment->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function removeComment(Comment $comment): static
-    {
-        if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
-            if ($comment->getAuthor() === $this) {
-                $comment->setAuthor(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, ActivityLog>
      */
     public function getActivityLogs(): Collection
     {
         return $this->activityLogs;
-    }
-
-    public function addActivityLog(ActivityLog $activityLog): static
-    {
-        if (!$this->activityLogs->contains($activityLog)) {
-            $this->activityLogs->add($activityLog);
-            $activityLog->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeActivityLog(ActivityLog $activityLog): static
-    {
-        if ($this->activityLogs->removeElement($activityLog)) {
-            // set the owning side to null (unless already changed)
-            if ($activityLog->getUser() === $this) {
-                $activityLog->setUser(null);
-            }
-        }
-
-        return $this;
     }
 }

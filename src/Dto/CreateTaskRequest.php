@@ -11,6 +11,7 @@ class CreateTaskRequest
     #[Assert\Length(max: 255)]
     public string $title = '';
 
+    #[Assert\Length(max: 5000)]
     public ?string $description = null;
 
     #[Assert\Choice(choices: Task::STATUSES, message: 'Недопустимый статус')]
@@ -19,7 +20,9 @@ class CreateTaskRequest
     #[Assert\Choice(choices: Task::PRIORITIES, message: 'Недопустимый приоритет')]
     public string $priority = Task::PRIORITY_MEDIUM;
 
+    #[Assert\Positive(message: 'Некорректный ID исполнителя')]
     public ?int $assigneeId = null;
 
-    public ?string $dueDate = null; // формат YYYY-MM-DD
+    #[Assert\Date(message: 'Дата должна быть в формате YYYY-MM-DD')]
+    public ?string $dueDate = null;
 }

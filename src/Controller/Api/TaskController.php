@@ -14,7 +14,9 @@ use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\ProjectVoter;
 use App\Security\Voter\TaskVoter;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,14 +26,12 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class TaskController extends AbstractController
 {
-    // Группы для списка задач (краткая инфа)
     private const LIST_GROUPS = [
         'task:read',
         'task:read:assignee',
         'task:read:reporter',
     ];
 
-    // Группы для просмотра одной задачи (полная инфа)
     private const ITEM_GROUPS = [
         'task:read',
         'task:read:assignee',
@@ -46,11 +46,14 @@ class TaskController extends AbstractController
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
 
-        $tasks = $taskRepository->findBy(['project' => $project], ['id' => 'DESC']);
+        $tasks = $taskRepository->findByProject($project);
 
         return $this->json($tasks, 200, [], ['groups' => self::LIST_GROUPS]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/api/projects/{id}/tasks', name: 'api_tasks_create', methods: ['POST'])]
     public function create(
         Project                                $project,
@@ -59,6 +62,8 @@ class TaskController extends AbstractController
         UserRepository                         $userRepository
     ): JsonResponse
     {
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
+
         $user = $this->getUser();
         if (!$user instanceof User) throw $this->createAccessDeniedException();
 
@@ -76,11 +81,11 @@ class TaskController extends AbstractController
         }
 
         if ($request->dueDate) {
-            $task->setDueDate(new \DateTimeImmutable($request->dueDate));
+            $task->setDueDate(new DateTimeImmutable($request->dueDate));
         }
 
         if ($task->getStatus() === Task::STATUS_DONE) {
-            $task->setCompletedAt(new \DateTimeImmutable());
+            $task->setCompletedAt(new DateTimeImmutable());
         }
 
         $em->persist($task);
@@ -101,6 +106,9 @@ class TaskController extends AbstractController
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/api/projects/{projectId}/tasks/{taskId}', name: 'api_tasks_update', methods: ['PATCH'])]
     public function update(
         #[MapEntity(id: 'projectId')] Project  $project,
@@ -110,7 +118,7 @@ class TaskController extends AbstractController
         UserRepository                         $userRepository
     ): JsonResponse
     {
-        $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
         $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
@@ -122,7 +130,7 @@ class TaskController extends AbstractController
         if ($request->status !== null) {
             $task->setStatus($request->status);
             if ($request->status === Task::STATUS_DONE && !$task->getCompletedAt()) {
-                $task->setCompletedAt(new \DateTimeImmutable());
+                $task->setCompletedAt(new DateTimeImmutable());
             } elseif ($request->status !== Task::STATUS_DONE) {
                 $task->setCompletedAt(null);
             }
@@ -136,7 +144,7 @@ class TaskController extends AbstractController
         }
 
         if ($request->dueDate !== null) {
-            $task->setDueDate($request->dueDate ? new \DateTimeImmutable($request->dueDate) : null);
+            $task->setDueDate($request->dueDate ? new DateTimeImmutable($request->dueDate) : null);
         }
 
         $em->flush();
@@ -151,7 +159,7 @@ class TaskController extends AbstractController
         EntityManagerInterface                $em
     ): JsonResponse
     {
-        $this->denyAccessUnlessGranted(ProjectVoter::DELETE, $project);
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
         $this->denyAccessUnlessGranted(TaskVoter::DELETE, $task);
@@ -164,11 +172,12 @@ class TaskController extends AbstractController
 
     #[Route('/api/projects/{projectId}/tasks/{taskId}/status', name: 'api_tasks_status_update', methods: ['PATCH'])]
     public function updateStatus(
-        #[MapEntity(id: 'projectId')] Project $project,
-        #[MapEntity(id: 'taskId')] Task $task,
+        #[MapEntity(id: 'projectId')] Project        $project,
+        #[MapEntity(id: 'taskId')] Task              $task,
         #[MapRequestPayload] UpdateTaskStatusRequest $request,
-        EntityManagerInterface $em
-    ): JsonResponse {
+        EntityManagerInterface                       $em
+    ): JsonResponse
+    {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
@@ -177,7 +186,7 @@ class TaskController extends AbstractController
         $task->setStatus($request->status);
 
         if ($request->status === Task::STATUS_DONE) {
-            $task->setCompletedAt(new \DateTimeImmutable());
+            $task->setCompletedAt(new DateTimeImmutable());
         } else {
             $task->setCompletedAt(null);
         }
@@ -189,24 +198,22 @@ class TaskController extends AbstractController
 
     #[Route('/api/projects/{projectId}/tasks/{taskId}/tags', name: 'api_tasks_tags_update', methods: ['PATCH'])]
     public function updateTags(
-        #[MapEntity(id: 'projectId')] Project $project,
-        #[MapEntity(id: 'taskId')] Task $task,
+        #[MapEntity(id: 'projectId')] Project      $project,
+        #[MapEntity(id: 'taskId')] Task            $task,
         #[MapRequestPayload] UpdateTaskTagsRequest $request,
-        EntityManagerInterface $em,
-        TagRepository $tagRepository
-    ): JsonResponse {
+        EntityManagerInterface                     $em,
+        TagRepository                              $tagRepository
+    ): JsonResponse
+    {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
-        // Менять теги задачи может тот, кто может её редактировать
         $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
 
-        // 1. Сначала удаляем все текущие теги
         foreach ($task->getTags() as $existingTag) {
             $task->removeTag($existingTag);
         }
 
-        // 2. Добавляем новые (если они есть)
         if (!empty($request->tagIds)) {
             $newTags = $tagRepository->findBy(['id' => $request->tagIds]);
             foreach ($newTags as $tag) {
@@ -222,14 +229,10 @@ class TaskController extends AbstractController
     #[Route('/api/me/tasks/assigned', name: 'api_me_tasks_assigned', methods: ['GET'])]
     public function assignedTasks(TaskRepository $taskRepository): JsonResponse
     {
+        /** @var User $user */
         $user = $this->getUser();
 
-        $tasks = $taskRepository->createQueryBuilder('t')
-            ->where('t.assignee = :user')
-            ->setParameter('user', $user)
-            ->orderBy('t.id', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $tasks = $taskRepository->findAssignedToUser($user);
 
         return $this->json($tasks, 200, [], ['groups' => ['task:read', 'task:read:assignee', 'task:read:reporter', 'task:read:project']]);
     }
@@ -237,14 +240,10 @@ class TaskController extends AbstractController
     #[Route('/api/me/tasks/reported', name: 'api_me_tasks_reported', methods: ['GET'])]
     public function reportedTasks(TaskRepository $taskRepository): JsonResponse
     {
+        /** @var User $user */
         $user = $this->getUser();
 
-        $tasks = $taskRepository->createQueryBuilder('t')
-            ->where('t.reporter = :user')
-            ->setParameter('user', $user)
-            ->orderBy('t.id', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $tasks = $taskRepository->findReportedByUser($user);
 
         return $this->json($tasks, 200, [], ['groups' => ['task:read', 'task:read:assignee', 'task:read:reporter', 'task:read:project']]);
     }

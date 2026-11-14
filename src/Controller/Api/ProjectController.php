@@ -15,11 +15,9 @@ use App\Security\Voter\ProjectVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ProjectController extends AbstractController
 {
@@ -27,10 +25,18 @@ class ProjectController extends AbstractController
     public function list(ProjectRepository $projectRepository): JsonResponse
     {
         $user = $this->getCurrentUser();
-
         $projects = $projectRepository->findByUser($user);
 
         return $this->json($projects, Response::HTTP_OK, [], ['groups' => ['project:read', 'project:read:owner']]);
+    }
+
+    private function getCurrentUser(): User
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+        return $user;
     }
 
     #[Route('/api/projects/{id}', name: 'api_projects_show', methods: ['GET'])]
@@ -44,7 +50,7 @@ class ProjectController extends AbstractController
     #[Route('/api/projects', name: 'api_projects_create', methods: ['POST'])]
     public function create(
         #[MapRequestPayload] CreateProjectRequest $request,
-        EntityManagerInterface                    $entityManager,
+        EntityManagerInterface                    $em,
     ): JsonResponse
     {
         $user = $this->getCurrentUser();
@@ -59,61 +65,18 @@ class ProjectController extends AbstractController
         $member->setRole(ProjectMember::ROLE_OWNER);
         $project->addMember($member);
 
-        $entityManager->persist($project);
-        $entityManager->flush();
+        $em->persist($project);
+        $em->flush();
 
         return $this->json($project, Response::HTTP_CREATED, [], ['groups' => ['project:read', 'project:read:owner']]);
     }
 
-    #[Route('/api/projects/{id}', name: 'api_projects_update', methods: ['PATCH'])]
-    public function update(
-        Project                                   $project,
-        #[MapRequestPayload] UpdateProjectRequest $request,
-        EntityManagerInterface                    $entityManager,
-    ): JsonResponse
-    {
-        $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
-
-        if ($request->name !== null) {
-            $project->setName($request->name);
-        }
-        if ($request->description !== null) {
-            $project->setDescription($request->description);
-        }
-
-        $entityManager->flush();
-
-        return $this->json($project, Response::HTTP_OK, [], ['groups' => ['project:read', 'project:read:owner']]);
-    }
-
-    #[Route('/api/projects/{id}', name: 'api_projects_delete', methods: ['DELETE'])]
-    public function delete(
-        Project                $project,
-        EntityManagerInterface $entityManager
-    ): JsonResponse
-    {
-        $this->denyAccessUnlessGranted(ProjectVoter::DELETE, $project);
-
-        $entityManager->remove($project);
-        $entityManager->flush();
-
-        return $this->json(null, Response::HTTP_NO_CONTENT);
-    }
-
-    #[Route('/api/projects/{id}/members', name: 'api_projects_members_list', methods: ['GET'])]
-    public function listMembers(Project $project): JsonResponse
-    {
-        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
-
-        return $this->json($project->getMembers(), Response::HTTP_OK, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
-    }
-
     #[Route('/api/projects/{id}/members', name: 'api_projects_members_add', methods: ['POST'])]
     public function addMember(
-        Project $project,
+        Project                                      $project,
         #[MapRequestPayload] AddProjectMemberRequest $request,
-        EntityManagerInterface $entityManager,
-        UserRepository $userRepository
+        EntityManagerInterface                       $em,
+        UserRepository                               $userRepository
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::MANAGE_MEMBERS, $project);
@@ -134,22 +97,61 @@ class ProjectController extends AbstractController
         $member->setRole($request->role);
         $project->addMember($member);
 
-        $entityManager->flush();
+        $em->flush();
 
         return $this->json($member, Response::HTTP_CREATED, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
     }
 
+    #[Route('/api/projects/{id}', name: 'api_projects_update', methods: ['PATCH'])]
+    public function update(
+        Project                                   $project,
+        #[MapRequestPayload] UpdateProjectRequest $request,
+        EntityManagerInterface                    $em,
+    ): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $project);
+
+        if ($request->name !== null) $project->setName($request->name);
+        if ($request->description !== null) $project->setDescription($request->description);
+
+        $em->flush();
+
+        return $this->json($project, Response::HTTP_OK, [], ['groups' => ['project:read', 'project:read:owner']]);
+    }
+
+    #[Route('/api/projects/{id}', name: 'api_projects_delete', methods: ['DELETE'])]
+    public function delete(
+        Project                $project,
+        EntityManagerInterface $em
+    ): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::DELETE, $project);
+
+        $em->remove($project);
+        $em->flush();
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/api/projects/{id}/members', name: 'api_projects_members_list', methods: ['GET'])]
+    public function listMembers(Project $project): JsonResponse
+    {
+        $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
+
+        return $this->json($project->getMembers(), Response::HTTP_OK, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
+    }
+
     #[Route('/api/projects/{id}/members/{memberId}', name: 'api_projects_members_update', methods: ['PATCH'])]
     public function updateMember(
-        Project $project,
-        int $memberId,
+        Project                                         $project,
+        int                                             $memberId,
         #[MapRequestPayload] UpdateProjectMemberRequest $request,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface                          $em,
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::MANAGE_MEMBERS, $project);
 
-        $member = $entityManager->getRepository(ProjectMember::class)->find($memberId);
+        $member = $em->getRepository(ProjectMember::class)->find($memberId);
 
         if (!$member || $member->getProject() !== $project) {
             return $this->json(['error' => 'Участник не найден'], Response::HTTP_NOT_FOUND);
@@ -160,21 +162,21 @@ class ProjectController extends AbstractController
         }
 
         $member->setRole($request->role);
-        $entityManager->flush();
+        $em->flush();
 
         return $this->json($member, Response::HTTP_OK, [], ['groups' => ['project_member:read', 'project_member:read:user']]);
     }
 
     #[Route('/api/projects/{id}/members/{memberId}', name: 'api_projects_members_delete', methods: ['DELETE'])]
     public function deleteMember(
-        Project $project,
-        int $memberId,
-        EntityManagerInterface $entityManager,
+        Project                $project,
+        int                    $memberId,
+        EntityManagerInterface $em,
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::MANAGE_MEMBERS, $project);
 
-        $member = $entityManager->getRepository(ProjectMember::class)->find($memberId);
+        $member = $em->getRepository(ProjectMember::class)->find($memberId);
 
         if (!$member || $member->getProject() !== $project) {
             return $this->json(['error' => 'Участник не найден'], Response::HTTP_NOT_FOUND);
@@ -184,18 +186,9 @@ class ProjectController extends AbstractController
             return $this->json(['error' => 'Нельзя удалить владельца'], Response::HTTP_FORBIDDEN);
         }
 
-        $entityManager->remove($member);
-        $entityManager->flush();
+        $em->remove($member);
+        $em->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
-    }
-
-    private function getCurrentUser(): User
-    {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
-            throw $this->createAccessDeniedException();
-        }
-        return $user;
     }
 }

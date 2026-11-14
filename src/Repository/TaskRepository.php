@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Project;
 use App\Entity\Task;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,51 @@ class TaskRepository extends ServiceEntityRepository
         parent::__construct($registry, Task::class);
     }
 
-//    /**
-//     * @return Task[] Returns an array of Task objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Задачи для конкретного проекта
+     * @return Task[]
+     */
+    public function findByProject(Project $project): array
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.assignee', 'a')->addSelect('a')
+            ->leftJoin('t.reporter', 'r')->addSelect('r')
+            ->where('t.project = :project')
+            ->setParameter('project', $project)
+            ->orderBy('t.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Task
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Задачи, где я исполнитель
+     * @return Task[]
+     */
+    public function findAssignedToUser(User $user): array
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.project', 'p')->addSelect('p')
+            ->leftJoin('t.reporter', 'r')->addSelect('r')
+            ->where('t.assignee = :user')
+            ->setParameter('user', $user)
+            ->orderBy('t.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Задачи, где я постановщик
+     * @return Task[]
+     */
+    public function findReportedByUser(User $user): array
+    {
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.project', 'p')->addSelect('p')
+            ->leftJoin('t.assignee', 'a')->addSelect('a')
+            ->where('t.reporter = :user')
+            ->setParameter('user', $user)
+            ->orderBy('t.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

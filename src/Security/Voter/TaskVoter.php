@@ -5,11 +5,14 @@ namespace App\Security\Voter;
 use App\Entity\Project;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Security\Voter\Trait\AdminCheckTrait;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class TaskVoter extends Voter
 {
+    use AdminCheckTrait;
+
     public const EDIT = 'TASK_EDIT';
     public const DELETE = 'TASK_DELETE';
     public const CHANGE_STATUS = 'TASK_CHANGE_STATUS';
@@ -63,10 +66,5 @@ class TaskVoter extends Voter
         if ($task->getAssignee() === $user) return true;
 
         return false;
-    }
-
-    private function isAdmin(User $user): bool
-    {
-        return in_array('ROLE_ADMIN', $user->getRoles(), true);
     }
 }
