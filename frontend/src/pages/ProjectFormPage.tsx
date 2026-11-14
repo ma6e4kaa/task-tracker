@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiFetch } from '../api/client';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import React, {useState} from 'react';
+import {useNavigate, useLocation} from 'react-router-dom';
+import {apiFetch} from '../api/client';
+import {Card} from '../components/ui/Card';
+import {Input} from '../components/ui/Input';
+import {Button} from '../components/ui/Button';
 import styles from './ProjectFormPage.module.css';
 
 export function ProjectFormPage() {
@@ -12,6 +12,8 @@ export function ProjectFormPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const location = useLocation();
+    const returnUrl = (location.state as any)?.from || '/projects';
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
@@ -21,9 +23,9 @@ export function ProjectFormPage() {
         try {
             const project = await apiFetch<{ id: number }>('/api/projects', {
                 method: 'POST',
-                body: JSON.stringify({ name, description }),
+                body: JSON.stringify({name, description}),
             });
-            navigate(`/projects/${project.id}`);
+            navigate(returnUrl);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка создания');
         } finally {
@@ -59,7 +61,7 @@ export function ProjectFormPage() {
                         <Button type="submit" disabled={loading}>
                             {loading ? 'Создание...' : 'Создать'}
                         </Button>
-                        <Button type="button" variant="danger" onClick={() => navigate('/projects')}>
+                        <Button type="button" variant="danger" onClick={() => navigate(returnUrl)}>
                             Отменить
                         </Button>
                     </div>

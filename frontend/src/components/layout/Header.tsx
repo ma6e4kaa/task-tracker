@@ -24,6 +24,7 @@ export function Header() {
                 {isAuthenticated && (
                     <nav className={styles.nav}>
                         <NavLink to="/projects" className={navLinkClass}>Проекты</NavLink>
+                        <NavLink to="/my-tasks" className={navLinkClass}>Мои задачи</NavLink>
                         {isAdmin && (
                             <NavLink to="/users" className={navLinkClass}>Пользователи</NavLink>
                         )}

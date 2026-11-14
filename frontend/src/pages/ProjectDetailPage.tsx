@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import {Link, useParams, useNavigate} from 'react-router-dom';
 import {useApi} from '../hooks/useApi';
 import {Card} from '../components/ui/Card';
 import styles from './ProjectDetailPage.module.css';
 import {useAuth} from '../context/AuthContext';
 import {ProjectTasksTab} from './project/ProjectTasksTab';
 import {ProjectMembersTab} from './project/ProjectMembersTab';
-import { apiFetch } from '../api/client';
-import { EditIcon, TrashIcon } from '../components/icons';
+import {apiFetch} from '../api/client';
+import {EditIcon, TrashIcon} from '../components/icons';
 import {Button} from "../components/ui/Button";
 
 interface Project {
@@ -41,7 +41,7 @@ export function ProjectDetailPage() {
 
         setDeleting(true);
         try {
-            await apiFetch(`/api/projects/${id}`, { method: 'DELETE' });
+            await apiFetch(`/api/projects/${id}`, {method: 'DELETE'});
             navigate('/projects');
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Ошибка удаления');
@@ -61,8 +61,8 @@ export function ProjectDetailPage() {
                     {isOwner && (
                         <div className={styles.buttons}>
                             <Button to={`/projects/${project.id}/edit`}
-                                  title="Редактировать проект">
-                                <EditIcon />
+                                    title="Редактировать проект" state={{from: `/projects/${project.id}`}}>
+                                <EditIcon/>
                                 <span>Редактировать</span>
                             </Button>
 
@@ -72,7 +72,7 @@ export function ProjectDetailPage() {
                                 title="Удалить проект"
                                 disabled={deleting}
                             >
-                                <TrashIcon />
+                                <TrashIcon/>
                                 <span>{deleting ? 'Удаление...' : 'Удалить'}</span>
                             </Button>
                         </div>
@@ -107,7 +107,7 @@ export function ProjectDetailPage() {
             <div className={styles.tabContent}>
                 {activeTab === 'tasks' && (
                     <Card>
-                        <ProjectTasksTab projectId={project.id} ownerEmail={project.owner.email} />
+                        <ProjectTasksTab projectId={project.id} ownerEmail={project.owner.email}/>
                     </Card>
                 )}
 

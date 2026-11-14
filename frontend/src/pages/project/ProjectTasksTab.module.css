@@ -9,36 +9,6 @@
     width: 300px;
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.table th {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 2px solid var(--color-border);
-    color: var(--color-text-muted);
-    font-weight: 500;
-    font-size: 13px;
-}
-
-.table td {
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
-    vertical-align: middle;
-}
-
-.textRight {
-    text-align: right;
-}
-
-.emptyState {
-    text-align: center;
-    color: var(--color-text-muted);
-    padding: var(--spacing-xl) !important;
-}
-
 .loading {
     text-align: center;
     padding: var(--spacing-xl);

@@ -15,6 +15,7 @@ import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { ProjectEditPage } from './pages/ProjectEditPage';
 import { TaskFormPage } from './pages/project/TaskFormPage';
 import { TaskDetailPage } from './pages/project/TaskDetailPage';
+import {MyTasksPage} from "./pages/MyTasksPage";
 
 export default function App() {
     return (
@@ -36,6 +37,7 @@ export default function App() {
                         }
                     >
                         <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/my-tasks" element={<MyTasksPage />} />
                         <Route path="/projects" element={<ProjectsPage />} />
                         <Route path="/projects/new" element={<ProjectFormPage />} />
                         <Route path="/projects/:id" element={<ProjectDetailPage />} />
@@ -60,8 +62,8 @@ export default function App() {
                     </Route>
 
                     {/* Редиректы */}
-                    <Route path="/" element={<Navigate to="/profile" replace />} />
-                    <Route path="*" element={<Navigate to="/profile" replace />} />
+                    <Route path="/" element={<Navigate to="/my-tasks" replace />} />
+                    <Route path="*" element={<Navigate to="/my-tasks" replace />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

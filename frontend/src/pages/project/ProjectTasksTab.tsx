@@ -1,43 +1,21 @@
 import React, {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation} from 'react-router-dom';
 import {apiFetch} from '../../api/client';
 import {Button} from '../../components/ui/Button';
 import {Input} from '../../components/ui/Input';
-import {ActionButtons} from '../../components/ui/ActionButtons';
 import styles from './ProjectTasksTab.module.css';
-import {useAuth} from '../../context/AuthContext';
-import {StatusBadge} from '../../components/ui/StatusBadge';
-import {PriorityBadge} from '../../components/ui/PriorityBadge';
-
-interface Task {
-    id: number;
-    title: string;
-    status: string;
-    priority: string;
-    reporter: { id: number; email: string };
-    assignee: { id: number; email: string } | null;
-}
+import {TaskTable, Task} from "../../components/ui/TaskTable";
 
 interface Props {
     projectId: number;
     ownerEmail: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-    todo: 'К выполнению',
-    in_progress: 'В работе',
-    review: 'На проверке',
-    done: 'Готово'
-};
-
 export function ProjectTasksTab({projectId, ownerEmail}: Props) {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
-
-    const {user, isAdmin} = useAuth();
-    const navigate = useNavigate();
-    const isProjectOwner = user?.email === ownerEmail;
+    const location = useLocation();
 
     useEffect(() => {
         apiFetch<Task[]>(`/api/projects/${projectId}/tasks`)
@@ -71,53 +49,12 @@ export function ProjectTasksTab({projectId, ownerEmail}: Props) {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <Button to={`/projects/${projectId}/tasks/new`}>
+                <Button to={`/projects/${projectId}/tasks/new`} state={{from: location.pathname}}>
                     Добавить задачу
                 </Button>
             </div>
 
-            <table className={styles.table}>
-                <thead>
-                <tr>
-                    <th>Название</th>
-                    <th>Статус</th>
-                    <th>Приоритет</th>
-                    <th>Исполнитель</th>
-                    <th className={styles.textRight}>Действия</th>
-                </tr>
-                </thead>
-                <tbody>
-                {filteredTasks.map(task => {
-                    // Проверяем права на редактирование КОНКРЕТНОЙ задачи
-                    const canEdit = isAdmin || isProjectOwner || task.reporter?.email === user?.email;
-
-                    return (
-                        <tr key={task.id}>
-                            <td>{task.title}</td>
-                            <td>
-                                <StatusBadge status={task.status}/>
-                            </td>
-                            <td>
-                                <PriorityBadge priority={task.priority}/>
-                            </td>
-                            <td>{task.assignee ? task.assignee.email : ''}</td>
-                            <td className={styles.textRight}>
-                                <ActionButtons
-                                    onView={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
-                                    onEdit={canEdit ? () => navigate(`/projects/${projectId}/tasks/${task.id}/edit`) : undefined}
-                                    onDelete={canEdit ? () => handleDelete(task.id) : undefined}
-                                />
-                            </td>
-                        </tr>
-                    );
-                })}
-                {filteredTasks.length === 0 && (
-                    <tr>
-                        <td colSpan={5} className={styles.emptyState}>Задачи не найдены</td>
-                    </tr>
-                )}
-                </tbody>
-            </table>
+            <TaskTable tasks={filteredTasks} projectId={projectId} onDelete={handleDelete}/>
         </div>
     );
 }

@@ -27,7 +27,8 @@ class TaskController extends AbstractController
     // Группы для списка задач (краткая инфа)
     private const LIST_GROUPS = [
         'task:read',
-        'task:read:assignee'
+        'task:read:assignee',
+        'task:read:reporter',
     ];
 
     // Группы для просмотра одной задачи (полная инфа)
@@ -216,5 +217,35 @@ class TaskController extends AbstractController
         $em->flush();
 
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
+    }
+
+    #[Route('/api/me/tasks/assigned', name: 'api_me_tasks_assigned', methods: ['GET'])]
+    public function assignedTasks(TaskRepository $taskRepository): JsonResponse
+    {
+        $user = $this->getUser();
+
+        $tasks = $taskRepository->createQueryBuilder('t')
+            ->where('t.assignee = :user')
+            ->setParameter('user', $user)
+            ->orderBy('t.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->json($tasks, 200, [], ['groups' => ['task:read', 'task:read:assignee', 'task:read:reporter', 'task:read:project']]);
+    }
+
+    #[Route('/api/me/tasks/reported', name: 'api_me_tasks_reported', methods: ['GET'])]
+    public function reportedTasks(TaskRepository $taskRepository): JsonResponse
+    {
+        $user = $this->getUser();
+
+        $tasks = $taskRepository->createQueryBuilder('t')
+            ->where('t.reporter = :user')
+            ->setParameter('user', $user)
+            ->orderBy('t.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->json($tasks, 200, [], ['groups' => ['task:read', 'task:read:assignee', 'task:read:reporter', 'task:read:project']]);
     }
 }

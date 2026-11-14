@@ -54,6 +54,7 @@ class Task
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['task:read:project'])]
     private ?Project $project = null;
 
     #[ORM\ManyToOne(inversedBy: 'assignedTasks')]

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
-import { apiFetch } from '../api/client';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
+import React, {useState, useEffect} from 'react';
+import {useNavigate, useParams, useLocation} from 'react-router-dom';
+import {useApi} from '../hooks/useApi';
+import {apiFetch} from '../api/client';
+import {Card} from '../components/ui/Card';
+import {Input} from '../components/ui/Input';
+import {Button} from '../components/ui/Button';
 import styles from './ProjectFormPage.module.css';
 
 interface Project {
@@ -14,9 +14,12 @@ interface Project {
 }
 
 export function ProjectEditPage() {
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { data: project, error: loadError, loading: isLoading } = useApi<Project>(`/api/projects/${id}`);
+    const location = useLocation();
+    const {data: project, error: loadError, loading: isLoading} = useApi<Project>(`/api/projects/${id}`);
+
+    const returnUrl = (location.state as any)?.from || `/projects/${id}`;
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -38,9 +41,9 @@ export function ProjectEditPage() {
         try {
             await apiFetch(`/api/projects/${id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ name, description }),
+                body: JSON.stringify({name, description}),
             });
-            navigate(`/projects/${id}`);
+            navigate(returnUrl);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка сохранения');
         } finally {
@@ -82,7 +85,7 @@ export function ProjectEditPage() {
                         <Button
                             type="button"
                             variant="danger"
-                            onClick={() => navigate(`/projects/${id}`)}
+                            onClick={() => navigate(returnUrl)}
                         >
                             Отменить
                         </Button>

@@ -42,7 +42,7 @@ export function LoginPage() {
             const me = await meResponse.json();
 
             login(token, { email: me.email, roles: me.roles });
-            navigate('/profile');
+            navigate('/my-tasks');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка входа');
         } finally {

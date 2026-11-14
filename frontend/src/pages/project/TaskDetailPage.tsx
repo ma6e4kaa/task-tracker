@@ -13,20 +13,6 @@ import {TagIcon} from '../../components/icons';
 import {TaskTagsModal} from './TaskTagsModal';
 import {TaskComments} from "./TaskComments";
 
-const STATUS_LABELS: Record<string, string> = {
-    todo: 'К выполнению',
-    in_progress: 'В работе',
-    review: 'На проверке',
-    done: 'Готово'
-};
-
-const PRIORITY_LABELS: Record<string, string> = {
-    low: 'Низкий',
-    medium: 'Средний',
-    high: 'Высокий',
-    critical: 'Критический'
-};
-
 export function TaskDetailPage() {
     const {id, taskId} = useParams<{ id: string; taskId: string }>();
     const navigate = useNavigate();
@@ -84,7 +70,8 @@ export function TaskDetailPage() {
                             <h1 className={styles.title}>{task.title}</h1>
                             {canEdit && (
                                 <div className={styles.actions}>
-                                    <Button to={`/projects/${id}/tasks/${taskId}/edit`}>
+                                    <Button to={`/projects/${id}/tasks/${taskId}/edit`}
+                                            state={{from: `/projects/${id}/tasks/${taskId}`}}>
                                         <EditIcon size={18}/> Редактировать
                                     </Button>
                                     <Button variant={"danger"} onClick={handleDelete} disabled={deleting}>
@@ -133,7 +120,7 @@ export function TaskDetailPage() {
                         </div>
                     </Card>
                     <Card>
-                        <TaskComments projectId={id as string} taskId={taskId as string} />
+                        <TaskComments projectId={id as string} taskId={taskId as string}/>
                     </Card>
                 </div>
 

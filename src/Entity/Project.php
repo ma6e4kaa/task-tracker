@@ -20,11 +20,11 @@ class Project
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['project:read'])]
+    #[Groups(['project:read', 'task:read:project'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['project:read'])]
+    #[Groups(['project:read', 'task:read:project'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
