@@ -9,6 +9,8 @@ use App\Dto\UpdateTaskTagsRequest;
 use App\Entity\Project;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Message\TaskNotification;
+use App\Message\TaskReadyForReviewNotification;
 use App\Repository\TagRepository;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
@@ -19,9 +21,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class TaskController extends AbstractController
@@ -53,13 +58,16 @@ class TaskController extends AbstractController
 
     /**
      * @throws Exception
+     * @throws ExceptionInterface
      */
     #[Route('/api/projects/{id}/tasks', name: 'api_tasks_create', methods: ['POST'])]
     public function create(
         Project                                $project,
         #[MapRequestPayload] CreateTaskRequest $request,
         EntityManagerInterface                 $em,
-        UserRepository                         $userRepository
+        UserRepository                         $userRepository,
+        MessageBusInterface                    $bus,
+        ParameterBagInterface                  $params
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
@@ -91,6 +99,23 @@ class TaskController extends AbstractController
         $em->persist($task);
         $em->flush();
 
+        // Если назначили исполнителя, и это не сам автор задачи — шлём уведомление в очередь
+        if ($task->getAssignee() && $task->getAssignee() !== $user) {
+            $url = $params->get('app.frontend_url')
+                . '/projects/' . $project->getId()
+                . '/tasks/' . $task->getId();
+
+            $bus->dispatch(new TaskNotification(
+                $task->getId(),
+                $task->getAssignee()->getEmail(),
+                $task->getTitle(),
+                $project->getName(),
+                $url,
+                $task->getDueDate()?->format('d.m.Y'),
+                'Вам назначена новая задача',
+            ));
+        }
+
         return $this->json($task, Response::HTTP_CREATED, [], ['groups' => self::ITEM_GROUPS]);
     }
 
@@ -108,6 +133,7 @@ class TaskController extends AbstractController
 
     /**
      * @throws Exception
+     * @throws ExceptionInterface
      */
     #[Route('/api/projects/{projectId}/tasks/{taskId}', name: 'api_tasks_update', methods: ['PATCH'])]
     public function update(
@@ -115,13 +141,20 @@ class TaskController extends AbstractController
         #[MapEntity(id: 'taskId')] Task        $task,
         #[MapRequestPayload] UpdateTaskRequest $request,
         EntityManagerInterface                 $em,
-        UserRepository                         $userRepository
+        UserRepository                         $userRepository,
+        MessageBusInterface                    $bus,
+        ParameterBagInterface                  $params
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
         $this->denyAccessUnlessGranted(TaskVoter::EDIT, $task);
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $oldStatus = $task->getStatus();
 
         if ($request->title !== null) $task->setTitle($request->title);
         if ($request->description !== null) $task->setDescription($request->description);
@@ -148,8 +181,54 @@ class TaskController extends AbstractController
         }
 
         $em->flush();
+        $this->sendEmails($task, $user, $project, $bus, $params, $oldStatus);
 
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
+    }
+
+    /**
+     * @throws ExceptionInterface
+     */
+    private function sendEmails(
+        Task                  $task,
+        User                  $user,
+        Project               $project,
+        MessageBusInterface   $bus,
+        ParameterBagInterface $params,
+        ?string               $oldStatus
+    ): void
+    {
+        if ($oldStatus === $task->getStatus()) {
+            return;
+        }
+
+        $url = $params->get('app.frontend_url')
+            . '/projects/' . $project->getId()
+            . '/tasks/' . $task->getId();
+
+        // 1. Задача ушла на проверку (из любого статуса в REVIEW)
+        if ($task->getStatus() === Task::STATUS_REVIEW && $task->getReporter() !== $user) {
+            $bus->dispatch(new TaskReadyForReviewNotification(
+                $task->getId(),
+                $task->getReporter()->getEmail(),
+                $task->getTitle(),
+                $project->getName(),
+                $url
+            ));
+        }
+
+        // 2. Задача возвращена в работу (только если была в REVIEW и стала IN_PROGRESS)
+        if ($oldStatus === Task::STATUS_REVIEW && $task->getStatus() === Task::STATUS_IN_PROGRESS && $task->getAssignee() !== $user) {
+            $bus->dispatch(new TaskNotification(
+                $task->getId(),
+                $task->getAssignee()->getEmail(),
+                $task->getTitle(),
+                $project->getName(),
+                $url,
+                $task->getDueDate()?->format('d.m.Y'),
+                'Задача возвращена в работу'
+            ));
+        }
     }
 
     #[Route('/api/projects/{projectId}/tasks/{taskId}', name: 'api_tasks_delete', methods: ['DELETE'])]
@@ -170,18 +249,28 @@ class TaskController extends AbstractController
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route('/api/projects/{projectId}/tasks/{taskId}/status', name: 'api_tasks_status_update', methods: ['PATCH'])]
     public function updateStatus(
         #[MapEntity(id: 'projectId')] Project        $project,
         #[MapEntity(id: 'taskId')] Task              $task,
         #[MapRequestPayload] UpdateTaskStatusRequest $request,
-        EntityManagerInterface                       $em
+        EntityManagerInterface                       $em,
+        MessageBusInterface                          $bus,
+        ParameterBagInterface                        $params
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
         if ($task->getProject() !== $project) throw $this->createNotFoundException();
 
         $this->denyAccessUnlessGranted(TaskVoter::CHANGE_STATUS, $task);
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $oldStatus = $task->getStatus();
 
         $task->setStatus($request->status);
 
@@ -192,6 +281,7 @@ class TaskController extends AbstractController
         }
 
         $em->flush();
+        $this->sendEmails($task, $user, $project, $bus, $params, $oldStatus);
 
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
     }

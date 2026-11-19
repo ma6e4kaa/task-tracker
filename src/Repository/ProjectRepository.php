@@ -28,7 +28,6 @@ class ProjectRepository extends ServiceEntityRepository
             ->where('p.owner = :user')
             ->orWhere('m.user = :user')
             ->setParameter('user', $user)
-            ->distinct()
             ->orderBy('p.id', 'DESC')
             ->getQuery()
             ->getResult();
