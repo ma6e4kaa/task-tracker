@@ -12,13 +12,14 @@ use App\Entity\User;
 use App\Message\TaskNotification;
 use App\Message\TaskReadyForReviewNotification;
 use App\Repository\TagRepository;
-use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\ProjectVoter;
 use App\Security\Voter\TaskVoter;
+use App\Service\TaskService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -46,12 +47,15 @@ class TaskController extends AbstractController
         'task:read:tags'
     ];
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/projects/{id}/tasks', name: 'api_tasks_list', methods: ['GET'])]
-    public function list(Project $project, TaskRepository $taskRepository): JsonResponse
+    public function list(Project $project, TaskService $taskService): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
 
-        $tasks = $taskRepository->findByProject($project);
+        $tasks = $taskService->getProjectTasks($project);
 
         return $this->json($tasks, 200, [], ['groups' => self::LIST_GROUPS]);
     }
@@ -59,6 +63,7 @@ class TaskController extends AbstractController
     /**
      * @throws Exception
      * @throws ExceptionInterface
+     * @throws InvalidArgumentException
      */
     #[Route('/api/projects/{id}/tasks', name: 'api_tasks_create', methods: ['POST'])]
     public function create(
@@ -67,7 +72,8 @@ class TaskController extends AbstractController
         EntityManagerInterface                 $em,
         UserRepository                         $userRepository,
         MessageBusInterface                    $bus,
-        ParameterBagInterface                  $params
+        ParameterBagInterface                  $params,
+        TaskService                            $taskService
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
@@ -98,6 +104,13 @@ class TaskController extends AbstractController
 
         $em->persist($task);
         $em->flush();
+
+        // Сброс кэша: задачи проекта, задачи репортёра, задачи исполнителя
+        $taskService->invalidateProjectTasks($project);
+        $taskService->invalidateUserTasks($user);
+        if ($task->getAssignee()) {
+            $taskService->invalidateUserTasks($task->getAssignee());
+        }
 
         // Если назначили исполнителя, и это не сам автор задачи — шлём уведомление в очередь
         if ($task->getAssignee() && $task->getAssignee() !== $user) {
@@ -134,6 +147,7 @@ class TaskController extends AbstractController
     /**
      * @throws Exception
      * @throws ExceptionInterface
+     * @throws InvalidArgumentException
      */
     #[Route('/api/projects/{projectId}/tasks/{taskId}', name: 'api_tasks_update', methods: ['PATCH'])]
     public function update(
@@ -143,7 +157,8 @@ class TaskController extends AbstractController
         EntityManagerInterface                 $em,
         UserRepository                         $userRepository,
         MessageBusInterface                    $bus,
-        ParameterBagInterface                  $params
+        ParameterBagInterface                  $params,
+        TaskService                            $taskService
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
@@ -155,6 +170,7 @@ class TaskController extends AbstractController
         $user = $this->getUser();
 
         $oldStatus = $task->getStatus();
+        $oldAssignee = $task->getAssignee();
 
         if ($request->title !== null) $task->setTitle($request->title);
         if ($request->description !== null) $task->setDescription($request->description);
@@ -181,6 +197,17 @@ class TaskController extends AbstractController
         }
 
         $em->flush();
+
+        // Сброс кэша: проект, репортёр, старый и новый исполнитель
+        $taskService->invalidateProjectTasks($project);
+        $taskService->invalidateUserTasks($user);
+        if ($oldAssignee) {
+            $taskService->invalidateUserTasks($oldAssignee);
+        }
+        if ($task->getAssignee()) {
+            $taskService->invalidateUserTasks($task->getAssignee());
+        }
+
         $this->sendEmails($task, $user, $project, $bus, $params, $oldStatus);
 
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
@@ -231,11 +258,15 @@ class TaskController extends AbstractController
         }
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/projects/{projectId}/tasks/{taskId}', name: 'api_tasks_delete', methods: ['DELETE'])]
     public function delete(
         #[MapEntity(id: 'projectId')] Project $project,
         #[MapEntity(id: 'taskId')] Task       $task,
-        EntityManagerInterface                $em
+        EntityManagerInterface                $em,
+        TaskService                           $taskService
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
@@ -243,14 +274,24 @@ class TaskController extends AbstractController
 
         $this->denyAccessUnlessGranted(TaskVoter::DELETE, $task);
 
+        $reporter = $task->getReporter();
+        $assignee = $task->getAssignee();
+
         $em->remove($task);
         $em->flush();
+
+        $taskService->invalidateProjectTasks($project);
+        $taskService->invalidateUserTasks($reporter);
+        if ($assignee) {
+            $taskService->invalidateUserTasks($assignee);
+        }
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     /**
      * @throws ExceptionInterface
+     * @throws InvalidArgumentException
      */
     #[Route('/api/projects/{projectId}/tasks/{taskId}/status', name: 'api_tasks_status_update', methods: ['PATCH'])]
     public function updateStatus(
@@ -259,7 +300,8 @@ class TaskController extends AbstractController
         #[MapRequestPayload] UpdateTaskStatusRequest $request,
         EntityManagerInterface                       $em,
         MessageBusInterface                          $bus,
-        ParameterBagInterface                        $params
+        ParameterBagInterface                        $params,
+        TaskService                                  $taskService
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
@@ -281,18 +323,29 @@ class TaskController extends AbstractController
         }
 
         $em->flush();
+
+        $taskService->invalidateProjectTasks($project);
+        $taskService->invalidateUserTasks($user);
+        if ($task->getAssignee()) {
+            $taskService->invalidateUserTasks($task->getAssignee());
+        }
+
         $this->sendEmails($task, $user, $project, $bus, $params, $oldStatus);
 
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/projects/{projectId}/tasks/{taskId}/tags', name: 'api_tasks_tags_update', methods: ['PATCH'])]
     public function updateTags(
         #[MapEntity(id: 'projectId')] Project      $project,
         #[MapEntity(id: 'taskId')] Task            $task,
         #[MapRequestPayload] UpdateTaskTagsRequest $request,
         EntityManagerInterface                     $em,
-        TagRepository                              $tagRepository
+        TagRepository                              $tagRepository,
+        TaskService                                $taskService
     ): JsonResponse
     {
         $this->denyAccessUnlessGranted(ProjectVoter::VIEW, $project);
@@ -313,27 +366,35 @@ class TaskController extends AbstractController
 
         $em->flush();
 
+        $taskService->invalidateProjectTasks($project);
+
         return $this->json($task, 200, [], ['groups' => self::ITEM_GROUPS]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/me/tasks/assigned', name: 'api_me_tasks_assigned', methods: ['GET'])]
-    public function assignedTasks(TaskRepository $taskRepository): JsonResponse
+    public function assignedTasks(TaskService $taskService): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
 
-        $tasks = $taskRepository->findAssignedToUser($user);
+        $tasks = $taskService->getAssignedTasks($user);
 
         return $this->json($tasks, 200, [], ['groups' => ['task:read', 'task:read:assignee', 'task:read:reporter', 'task:read:project']]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route('/api/me/tasks/reported', name: 'api_me_tasks_reported', methods: ['GET'])]
-    public function reportedTasks(TaskRepository $taskRepository): JsonResponse
+    public function reportedTasks(TaskService $taskService): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
 
-        $tasks = $taskRepository->findReportedByUser($user);
+        $tasks = $taskService->getReportedTasks($user);
 
         return $this->json($tasks, 200, [], ['groups' => ['task:read', 'task:read:assignee', 'task:read:reporter', 'task:read:project']]);
     }

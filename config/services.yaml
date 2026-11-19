@@ -22,3 +22,10 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\ProjectService:
+        arguments:
+            $projectCache: '@project.cache'
+
+    App\Service\TaskService:
+        arguments:
+            $taskCache: '@task.cache'
