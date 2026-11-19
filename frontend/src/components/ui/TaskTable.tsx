@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link, useNavigate, useLocation} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import {ActionButtons} from './ActionButtons';
 import {StatusBadge} from './StatusBadge';
 import {PriorityBadge} from './PriorityBadge';
@@ -23,6 +23,7 @@ interface Props {
     showProjectColumn?: boolean;
     projectId?: number;
     emptyMessage?: string;
+    ownerEmail?: string;
 }
 
 export function TaskTable({
@@ -30,7 +31,8 @@ export function TaskTable({
                               onDelete,
                               showProjectColumn = false,
                               projectId,
-                              emptyMessage = 'Задачи не найдены'
+                              emptyMessage = 'Задачи не найдены',
+                              ownerEmail,
                           }: Props) {
     const navigate = useNavigate();
     const {user, isAdmin} = useAuth();
@@ -54,10 +56,11 @@ export function TaskTable({
                 <tbody>
                 {tasks.map(task => {
                     const isReporter = task.reporter?.email === user?.email;
-                    const canEdit = isAdmin || isReporter;
+                    const isOwner = ownerEmail === user?.email;
+                    const canEdit = isAdmin || isReporter || isOwner;
 
                     const baseUrl = projectId ? `/projects/${projectId}/tasks/${task.id}` :
-                        task.project ? `/projects/${task.project.id}/tasks/${task.id}` : ``;
+                        task.project ? `/projects/${task.project.id}/tasks/${task.id}` : `#`;
 
                     return (
                         <tr key={task.id}>
@@ -81,7 +84,7 @@ export function TaskTable({
                             <td className={styles.textRight}>
                                 <ActionButtons
                                     onView={() => navigate(baseUrl)}
-                                    onEdit={canEdit ? () => navigate(`${baseUrl}/edit`, { state: { from: location.pathname } }) : undefined}
+                                    onEdit={canEdit ? () => navigate(`${baseUrl}/edit`, {state: {from: location.pathname}}) : undefined}
                                     onDelete={canEdit && onDelete ? () => onDelete(task.id) : undefined}
                                 />
                             </td>

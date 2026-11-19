@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import React, {useState} from 'react';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+import {useAuth} from '../context/AuthContext';
+import {Button} from '../components/ui/Button';
+import {Input} from '../components/ui/Input';
+import {Card} from '../components/ui/Card';
 import styles from './LoginPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 export function LoginPage() {
     const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ export function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const { login } = useAuth();
+    const {login} = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const justRegistered = (location.state as { registered?: boolean })?.registered;
@@ -25,8 +26,8 @@ export function LoginPage() {
         try {
             const response = await fetch('/api/login_check', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password}),
             });
 
             if (!response.ok) {
@@ -37,11 +38,11 @@ export function LoginPage() {
             const token = data.token;
 
             const meResponse = await fetch('/api/me', {
-                headers: { 'Authorization': `Bearer ${token}` },
+                headers: {'Authorization': `Bearer ${token}`},
             });
             const me = await meResponse.json();
 
-            login(token, { email: me.email, roles: me.roles });
+            login(token, {email: me.email, roles: me.roles});
             navigate('/my-tasks');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка входа');
@@ -55,7 +56,7 @@ export function LoginPage() {
             <Card className={styles.card}>
                 <h1 className={styles.title}>Вход</h1>
                 {justRegistered && (
-                    <div className={styles.success}>Регистрация успешна! Войдите в аккаунт.</div>
+                    <Alert type="success">Регистрация успешна! Войдите в аккаунт.</Alert>
                 )}
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <Input
@@ -76,7 +77,7 @@ export function LoginPage() {
                         autoComplete="current-password"
                         disabled={loading}
                     />
-                    {error && <div className={styles.error}>{error}</div>}
+                    {error && <Alert type="error">{error}</Alert>}
                     <Button type="submit" disabled={loading}>
                         {loading ? 'Вход...' : 'Войти'}
                     </Button>

@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
-import {useNavigate, useLocation} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {apiFetch} from '../api/client';
 import {Card} from '../components/ui/Card';
 import {Input} from '../components/ui/Input';
 import {Button} from '../components/ui/Button';
 import styles from './ProjectFormPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 export function ProjectFormPage() {
     const [name, setName] = useState('');
@@ -56,7 +57,7 @@ export function ProjectFormPage() {
                             rows={4}
                         />
                     </div>
-                    {error && <div className={styles.error}>{error}</div>}
+                    {error && <Alert type="error">{error}</Alert>}
                     <div className={styles.actions}>
                         <Button type="submit" disabled={loading}>
                             {loading ? 'Создание...' : 'Создать'}

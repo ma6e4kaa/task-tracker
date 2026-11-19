@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import {apiFetch} from '../../api/client';
 import {Button} from '../../components/ui/Button';
 import {Input} from '../../components/ui/Input';
 import styles from './ProjectTasksTab.module.css';
-import {TaskTable, Task} from "../../components/ui/TaskTable";
+import {Task, TaskTable} from "../../components/ui/TaskTable";
 
 interface Props {
     projectId: number;
@@ -54,7 +54,7 @@ export function ProjectTasksTab({projectId, ownerEmail}: Props) {
                 </Button>
             </div>
 
-            <TaskTable tasks={filteredTasks} projectId={projectId} onDelete={handleDelete}/>
+            <TaskTable tasks={filteredTasks} projectId={projectId} onDelete={handleDelete} ownerEmail={ownerEmail}/>
         </div>
     );
 }

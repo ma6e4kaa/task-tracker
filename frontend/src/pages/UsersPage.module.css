@@ -1,7 +1,6 @@
 .wrapper {
     min-height: 100%;
     padding: var(--spacing-xl) var(--spacing-lg);
-    background: var(--color-bg);
 }
 
 .card {
@@ -30,15 +29,6 @@
     padding: var(--spacing-xl);
     text-align: center;
     color: var(--color-text-muted);
-}
-
-.error {
-    padding: var(--spacing-md);
-    background: var(--color-error-bg);
-    border: 1px solid var(--color-error-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-error);
-    margin-bottom: var(--spacing-md);
 }
 
 .table {
@@ -81,8 +71,8 @@
 .statusActive {
     display: inline-block;
     padding: 2px 10px;
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: var(--color-success-bg);
+    color: var(--color-success);
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
@@ -91,8 +81,8 @@
 .statusInactive {
     display: inline-block;
     padding: 2px 10px;
-    background: #fdecea;
-    color: #c62828;
+    background: var(--color-error-bg);
+    color: var(--color-error);
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;

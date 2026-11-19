@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { apiFetch } from '../api/client';
-import { useApi } from '../hooks/useApi';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import React, {useEffect, useState} from 'react';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {apiFetch} from '../api/client';
+import {useApi} from '../hooks/useApi';
+import {Button} from '../components/ui/Button';
+import {Input} from '../components/ui/Input';
+import {Card} from '../components/ui/Card';
 import styles from './AdminUserEditPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 interface User {
     id: number;
@@ -16,9 +17,9 @@ interface User {
 }
 
 export function AdminUserEditPage() {
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { data: user, error, loading } = useApi<User>(`/api/users/${id}`);
+    const {data: user, error, loading} = useApi<User>(`/api/users/${id}`);
 
     const [email, setEmail] = useState('');
     const [roles, setRoles] = useState<string[]>([]);
@@ -52,7 +53,7 @@ export function AdminUserEditPage() {
         try {
             await apiFetch(`/api/users/${id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ email, roles, isActive }),
+                body: JSON.stringify({email, roles, isActive}),
             });
             setSaveSuccess(true);
         } catch (err) {
@@ -74,7 +75,7 @@ export function AdminUserEditPage() {
                     <Link to="/users" className={styles.backLink}>← Назад</Link>
                 </div>
 
-                {saveSuccess && <div className={styles.success}>Сохранено</div>}
+                {saveSuccess && <Alert type="success">Сохранено</Alert>}
 
                 <form onSubmit={handleSave} className={styles.form}>
                     <Input
@@ -122,7 +123,7 @@ export function AdminUserEditPage() {
                         </label>
                     </div>
 
-                    {saveError && <div className={styles.error}>{saveError}</div>}
+                    {saveError && <Alert type="error">{saveError}</Alert>}
 
                     <div className={styles.actions}>
                         <Button type="submit" disabled={saving}>

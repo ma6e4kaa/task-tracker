@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { apiFetch, ApiError } from '../api/client';
-import { useAuth } from '../context/AuthContext';
+import {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {ApiError, apiFetch} from '../api/client';
+import {useAuth} from '../context/AuthContext';
 
 interface UseApiResult<T> {
     data: T | null;
@@ -9,12 +9,13 @@ interface UseApiResult<T> {
     loading: boolean;
 }
 
-export function useApi<T>(url: string | null): UseApiResult<T> {
+export function useApi<T>(url: string | null): UseApiResult<T> & { refetch: () => void } {
     const [data, setData] = useState<T | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(!!url);
+    const [trigger, setTrigger] = useState(0);
 
-    const { logout } = useAuth();
+    const {logout} = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,7 +38,7 @@ export function useApi<T>(url: string | null): UseApiResult<T> {
 
                 if (err instanceof ApiError && err.status === 401) {
                     logout();
-                    navigate('/login', { replace: true });
+                    navigate('/login', {replace: true});
                     return;
                 }
 
@@ -50,7 +51,9 @@ export function useApi<T>(url: string | null): UseApiResult<T> {
         return () => {
             cancelled = true;
         };
-    }, [url, logout, navigate]);
+    }, [url, logout, navigate, trigger]);
 
-    return { data, error, loading };
+    const refetch = () => setTrigger(prev => prev + 1);
+
+    return {data, error, loading, refetch};
 }

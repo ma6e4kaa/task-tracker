@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {useNavigate, useParams, useLocation} from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {apiFetch} from '../../api/client';
 import {useApi} from '../../hooks/useApi';
 import {Card} from '../../components/ui/Card';
@@ -31,12 +31,10 @@ export function TaskFormPage() {
 
     const returnUrl = (location.state as any)?.from || `/projects/${id}`;
 
-    // Загружаем участников для выпадающего списка
     useEffect(() => {
         apiFetch<Member[]>(`/api/projects/${id}/members`).then(setMembers);
     }, [id]);
 
-    // Если редактируем — загружаем задачу. Если создаем — передаем null
     const {data: task, loading: taskLoading} = useApi<any>(isEdit ? `/api/projects/${id}/tasks/${taskId}` : null);
 
     useEffect(() => {
@@ -46,7 +44,6 @@ export function TaskFormPage() {
             setStatus(task.status || 'todo');
             setPriority(task.priority || 'medium');
             setAssigneeId(task.assignee?.id?.toString() || '');
-            // Безопасное извлечение даты
             if (task.dueDate) {
                 setDueDate(task.dueDate.split('T')[0]);
             } else {
@@ -55,7 +52,7 @@ export function TaskFormPage() {
         }
     }, [task]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);

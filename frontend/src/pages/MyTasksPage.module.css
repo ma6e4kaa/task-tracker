@@ -21,7 +21,6 @@
     width: 300px;
 }
 
-/* Сегментированный контрол */
 .segmentedControl {
     display: flex;
     background: rgba(118, 118, 128, 0.12);
@@ -52,10 +51,4 @@
     text-align: center;
     padding: var(--spacing-xl);
     color: var(--color-text-muted);
-}
-
-.error {
-    color: var(--color-error);
-    text-align: center;
-    padding: var(--spacing-xl);
 }

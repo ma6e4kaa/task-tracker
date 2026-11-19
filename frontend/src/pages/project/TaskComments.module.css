@@ -81,7 +81,7 @@
 }
 
 .comment:hover .actions {
-    opacity: 1; /* Кнопки проявляются при наведении на комментарий */
+    opacity: 1;
 }
 
 .actionBtn, .actionBtnDelete {
@@ -95,8 +95,15 @@
     align-items: center;
 }
 
-.actionBtn:hover { color: var(--color-primary); background: rgba(0,122,255,0.1); }
-.actionBtnDelete:hover { color: var(--color-error); background: rgba(255,59,48,0.1); }
+.actionBtn:hover {
+    color: var(--color-primary);
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.actionBtnDelete:hover {
+    color: var(--color-error);
+    background: rgba(255, 59, 48, 0.1);
+}
 
 .editForm {
     display: flex;

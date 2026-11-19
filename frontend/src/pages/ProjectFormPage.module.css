@@ -45,11 +45,6 @@
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
 }
 
-.error {
-    color: var(--color-error);
-    font-size: 14px;
-}
-
 .actions {
     display: flex;
     gap: var(--spacing-sm);

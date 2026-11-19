@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useApi } from '../hooks/useApi';
-import { apiFetch } from '../api/client';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from '../context/AuthContext';
+import {useApi} from '../hooks/useApi';
+import {apiFetch} from '../api/client';
+import {Button} from '../components/ui/Button';
+import {Input} from '../components/ui/Input';
+import {Card} from '../components/ui/Card';
 import styles from './ProfilePage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 interface MeResponse {
     id: number;
@@ -17,8 +18,8 @@ interface MeResponse {
 }
 
 export function ProfilePage() {
-    const { data: me, error, loading } = useApi<MeResponse>('/api/me');
-    const { logout, user } = useAuth();
+    const {data: me, error, loading, refetch} = useApi<MeResponse>('/api/me');
+    const {logout, user} = useAuth();
     const navigate = useNavigate();
 
     const [editMode, setEditMode] = useState(false);
@@ -29,7 +30,6 @@ export function ProfilePage() {
     const [saveError, setSaveError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    // Заполняем email, когда me загрузился
     useEffect(() => {
         if (me && !editMode) {
             setEmail(me.email);
@@ -75,8 +75,7 @@ export function ProfilePage() {
             });
             setEditMode(false);
             setSuccessMessage('Профиль обновлён');
-            // Перезагрузить страницу, чтобы useApi перезапросил /api/me
-            window.location.reload();
+            refetch();
         } catch (err) {
             setSaveError(err instanceof Error ? err.message : 'Ошибка сохранения');
         } finally {
@@ -87,7 +86,7 @@ export function ProfilePage() {
     const handleDeactivate = async () => {
         if (!window.confirm('Деактивировать аккаунт? Вы не сможете войти.')) return;
         try {
-            await apiFetch('/api/me', { method: 'DELETE' });
+            await apiFetch('/api/me', {method: 'DELETE'});
             logout();
             navigate('/login');
         } catch (err) {
@@ -96,7 +95,7 @@ export function ProfilePage() {
     };
 
     if (loading) return <div className={styles.wrapper}><Card>Загрузка...</Card></div>;
-    if (error) return <div className={styles.wrapper}><Card>Ошибка: {error}</Card></div>;
+    if (error) return <div className={styles.wrapper}><Alert type="error">Ошибка: {error}</Alert></div>;
     if (!me) return null;
 
     return (
@@ -104,7 +103,7 @@ export function ProfilePage() {
             <Card className={styles.card}>
                 <h1 className={styles.title}>Профиль</h1>
 
-                {successMessage && <div className={styles.success}>{successMessage}</div>}
+                {successMessage && <Alert type="success">{successMessage}</Alert>}
 
                 {!editMode ? (
                     <>
@@ -158,7 +157,7 @@ export function ProfilePage() {
                             onChange={(e) => setNewPassword(e.target.value)}
                             disabled={saving}
                         />
-                        {saveError && <div className={styles.error}>{saveError}</div>}
+                        {saveError && <Alert type="error">{saveError}</Alert>}
                         <div className={styles.actions}>
                             <Button type="submit" disabled={saving}>
                                 {saving ? 'Сохранение...' : 'Сохранить'}

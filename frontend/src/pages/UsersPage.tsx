@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
+import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
+import {useApi} from '../hooks/useApi';
+import {Card} from '../components/ui/Card';
+import {Input} from '../components/ui/Input';
 import styles from './UsersPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 interface User {
     id: number;
@@ -19,7 +20,7 @@ export function UsersPage() {
         ? `/api/users?search=${encodeURIComponent(search)}`
         : '/api/users';
 
-    const { data: users, error, loading } = useApi<User[]>(url);
+    const {data: users, error, loading} = useApi<User[]>(url);
 
     return (
         <div className={styles.wrapper}>
@@ -40,7 +41,7 @@ export function UsersPage() {
 
                 {loading && <div className={styles.loading}>Загрузка...</div>}
 
-                {error && <div className={styles.error}>Ошибка: {error}</div>}
+                {error && <Alert type="error">Ошибка: {error}</Alert>}
 
                 {users && users.length === 0 && (
                     <div className={styles.empty}>Ничего не найдено</div>

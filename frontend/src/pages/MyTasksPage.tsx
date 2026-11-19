@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useApi } from '../hooks/useApi';
-import { apiFetch } from '../api/client';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { TaskTable, Task } from '../components/ui/TaskTable';
+import React, {useState} from 'react';
+import {useApi} from '../hooks/useApi';
+import {apiFetch} from '../api/client';
+import {Card} from '../components/ui/Card';
+import {Input} from '../components/ui/Input';
+import {Task, TaskTable} from '../components/ui/TaskTable';
 import styles from './MyTasksPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 type Tab = 'assigned' | 'reported';
 
@@ -12,14 +13,14 @@ export function MyTasksPage() {
     const [activeTab, setActiveTab] = useState<Tab>('assigned');
     const [search, setSearch] = useState('');
 
-    const { data: tasks, loading, error } = useApi<Task[]>(`/api/me/tasks/${activeTab}`);
+    const {data: tasks, loading, error, refetch} = useApi<Task[]>(`/api/me/tasks/${activeTab}`);
 
     const handleDelete = async (taskId: number) => {
         if (window.confirm('Удалить задачу?')) {
             const task = tasks?.find(t => t.id === taskId);
             if (task && task.project) {
-                await apiFetch(`/api/projects/${task.project.id}/tasks/${taskId}`, { method: 'DELETE' });
-                window.location.reload();
+                await apiFetch(`/api/projects/${task.project.id}/tasks/${taskId}`, {method: 'DELETE'});
+                refetch();
             }
         }
     };
@@ -59,7 +60,7 @@ export function MyTasksPage() {
                 </div>
 
                 {loading && <div className={styles.message}>Загрузка...</div>}
-                {error && <div className={styles.error}>{error}</div>}
+                {error && <Alert type="error">{error}</Alert>}
 
                 {!loading && !error && (
                     <TaskTable

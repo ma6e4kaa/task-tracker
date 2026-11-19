@@ -1,11 +1,12 @@
-import React, {useState, useEffect} from 'react';
-import {useNavigate, useParams, useLocation} from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useApi} from '../hooks/useApi';
 import {apiFetch} from '../api/client';
 import {Card} from '../components/ui/Card';
 import {Input} from '../components/ui/Input';
 import {Button} from '../components/ui/Button';
 import styles from './ProjectFormPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 interface Project {
     id: number;
@@ -77,7 +78,7 @@ export function ProjectEditPage() {
                             rows={4}
                         />
                     </div>
-                    {error && <div className={styles.error}>{error}</div>}
+                    {error && <Alert type="error">{error}</Alert>}
                     <div className={styles.actions}>
                         <Button type="submit" disabled={saving}>
                             {saving ? 'Сохранение...' : 'Сохранить'}

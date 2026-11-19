@@ -1,15 +1,14 @@
 import React, {useState} from 'react';
-import {useNavigate, useParams, Link} from 'react-router-dom';
+import {Link, useNavigate, useParams} from 'react-router-dom';
 import {useApi} from '../../hooks/useApi';
 import {apiFetch} from '../../api/client';
 import {Card} from '../../components/ui/Card';
-import {EditIcon, TrashIcon} from '../../components/icons';
+import {EditIcon, TagIcon, TrashIcon} from '../../components/icons';
 import styles from './TaskDetailPage.module.css';
 import {Button} from "../../components/ui/Button";
 import {useAuth} from '../../context/AuthContext';
 import {StatusBadge} from '../../components/ui/StatusBadge';
 import {PriorityBadge} from '../../components/ui/PriorityBadge';
-import {TagIcon} from '../../components/icons';
 import {TaskTagsModal} from './TaskTagsModal';
 import {TaskComments} from "./TaskComments";
 
@@ -63,7 +62,6 @@ export function TaskDetailPage() {
             </div>
 
             <div className={styles.layout}>
-                {/* ЛЕВАЯ КОЛОНКА: Контент */}
                 <div className={styles.mainContent}>
                     <Card>
                         <div className={styles.header}>

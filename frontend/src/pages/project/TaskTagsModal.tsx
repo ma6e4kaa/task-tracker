@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { apiFetch } from '../../api/client';
-import { Modal } from '../../components/ui/Modal';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { useAuth } from '../../context/AuthContext'; // Чтобы проверять, админ ли
-import { TrashIcon } from '../../components/icons';
+import React, {useEffect, useState} from 'react';
+import {apiFetch} from '../../api/client';
+import {Modal} from '../../components/ui/Modal';
+import {Button} from '../../components/ui/Button';
+import {Input} from '../../components/ui/Input';
+import {useAuth} from '../../context/AuthContext';
+import {TrashIcon} from '../../components/icons';
 import styles from './TaskTagsModal.module.css';
 
 interface Tag {
@@ -19,10 +19,10 @@ interface Props {
     taskId: number;
     projectId: number;
     currentTags: Tag[];
-    onSave: () => void; // Коллбэк для обновления задачи
+    onSave: () => void;
 }
 
-export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags, onSave }: Props) {
+export function TaskTagsModal({isOpen, onClose, taskId, projectId, currentTags, onSave}: Props) {
     const [allTags, setAllTags] = useState<Tag[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [saving, setSaving] = useState(false);
@@ -32,9 +32,8 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
     const [newTagColor, setNewTagColor] = useState('#007aff');
     const [isCreating, setIsCreating] = useState(false);
 
-    const { isAdmin } = useAuth();
+    const {isAdmin} = useAuth();
 
-    // Загружаем все доступные теги в системе
     const fetchTags = () => {
         apiFetch<Tag[]>('/api/tags').then(setAllTags);
     };
@@ -44,7 +43,7 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
             fetchTags();
             setSelectedIds(currentTags.map(t => t.id));
         }
-    }, [isOpen, currentTags]);
+    }, [isOpen]);
 
     const toggleTag = (id: number) => {
         setSelectedIds(prev =>
@@ -57,7 +56,7 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
         try {
             await apiFetch(`/api/projects/${projectId}/tasks/${taskId}/tags`, {
                 method: 'PATCH',
-                body: JSON.stringify({ tagIds: selectedIds })
+                body: JSON.stringify({tagIds: selectedIds})
             });
             onSave();
             onClose();
@@ -68,8 +67,7 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
         }
     };
 
-    // Создание нового тега
-    const handleCreateTag = async (e: React.FormEvent) => {
+    const handleCreateTag = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (!newTagName.trim()) return;
         setIsCreating(true);
@@ -91,12 +89,11 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
         }
     };
 
-    // Удаление тега из системы (только админ)
     const handleDeleteTag = async (tagId: number, e: React.MouseEvent) => {
-        e.preventDefault(); // Чтобы не переключился чекбокс
+        e.preventDefault();
         if (!window.confirm('Удалить этот тег из системы? Он исчезнет со всех задач.')) return;
         try {
-            await apiFetch(`/api/tags/${tagId}`, { method: 'DELETE' });
+            await apiFetch(`/api/tags/${tagId}`, {method: 'DELETE'});
             setSelectedIds(prev => prev.filter(id => id !== tagId));
             fetchTags();
         } catch (err) {
@@ -107,7 +104,6 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Управление тегами">
 
-            {/* Список тегов с чекбоксами */}
             <div className={styles.tagList}>
                 {allTags.map(tag => (
                     <div key={tag.id} className={styles.tagRow}>
@@ -119,7 +115,7 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
                             />
                             <span
                                 className={styles.tagBadge}
-                                style={{ backgroundColor: tag.color || '#e5e5ea', color: tag.color ? '#fff' : 'inherit' }}
+                                style={{backgroundColor: tag.color || '#e5e5ea', color: tag.color ? '#fff' : 'inherit'}}
                             >
                                 {tag.name}
                             </span>
@@ -131,7 +127,7 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
                                 className={styles.deleteBtn}
                                 title="Удалить тег"
                             >
-                                <TrashIcon size={16} />
+                                <TrashIcon size={16}/>
                             </button>
                         )}
                     </div>
@@ -139,7 +135,6 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
                 {allTags.length === 0 && <p className={styles.empty}>Нет доступных тегов</p>}
             </div>
 
-            {/* Форма быстрого создания тега */}
             <form onSubmit={handleCreateTag} className={styles.createForm}>
                 <div className={styles.createInputWrapper}>
                     <Input
@@ -150,7 +145,6 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
                     />
                 </div>
 
-                {/* Инпут выбора цвета */}
                 <div className={styles.colorPickerWrapper}>
                     <label className={styles.colorLabel}>Цвет</label>
                     <input
@@ -167,7 +161,6 @@ export function TaskTagsModal({ isOpen, onClose, taskId, projectId, currentTags,
                 </Button>
             </form>
 
-            {/* Кнопки сохранения */}
             <div className={styles.modalActions}>
                 <Button variant="danger" onClick={onClose}>Отменить</Button>
                 <Button onClick={handleSave} disabled={saving}>

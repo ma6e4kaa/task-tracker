@@ -1,11 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {apiFetch} from '../../api/client';
 import {useAuth} from '../../context/AuthContext';
 import {Input} from '../../components/ui/Input';
 import {Button} from '../../components/ui/Button';
 import {Modal} from '../../components/ui/Modal';
 import styles from './ProjectMembersTab.module.css';
-import {EditIcon, TrashIcon} from '../../components/icons';
 import {ActionButtons} from "../../components/ui/ActionButtons";
 
 interface User {
@@ -39,11 +38,9 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
     const isOwner = user?.email === ownerEmail;
     const canManage = isOwner || isAdmin;
 
-    // Состояния модалок
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<ProjectMember | null>(null);
 
-    // Форма добавления
     const [newEmail, setNewEmail] = useState('');
     const [newRole, setNewRole] = useState('developer');
     const [isSaving, setIsSaving] = useState(false);
@@ -63,12 +60,11 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
         fetchMembers();
     }, [projectId]);
 
-    // Фильтрация по поиску
     const filteredMembers = members.filter(m =>
         m.user.email.toLowerCase().includes(search.toLowerCase())
     );
 
-    const handleAdd = async (e: React.FormEvent) => {
+    const handleAdd = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         setIsSaving(true);
         try {
@@ -86,7 +82,7 @@ export function ProjectMembersTab({projectId, ownerEmail}: Props) {
         }
     };
 
-    const handleEdit = async (e: React.FormEvent) => {
+    const handleEdit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (!editingMember) return;
         setIsSaving(true);

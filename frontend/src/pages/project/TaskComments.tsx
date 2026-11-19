@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { apiFetch } from '../../api/client';
-import { useAuth } from '../../context/AuthContext';
-import { Button } from '../../components/ui/Button';
-import { EditIcon, TrashIcon } from '../../components/icons';
+import React, {useEffect, useState} from 'react';
+import {apiFetch} from '../../api/client';
+import {useAuth} from '../../context/AuthContext';
+import {Button} from '../../components/ui/Button';
+import {EditIcon, TrashIcon} from '../../components/icons';
 import styles from './TaskComments.module.css';
 
 interface Comment {
@@ -17,14 +17,14 @@ interface Props {
     taskId: string;
 }
 
-export function TaskComments({ projectId, taskId }: Props) {
+export function TaskComments({projectId, taskId}: Props) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editContent, setEditContent] = useState('');
     const [loading, setLoading] = useState(true);
 
-    const { user, isAdmin } = useAuth();
+    const {user, isAdmin} = useAuth();
 
     const fetchComments = () => {
         apiFetch<Comment[]>(`/api/projects/${projectId}/tasks/${taskId}/comments`)
@@ -36,13 +36,13 @@ export function TaskComments({ projectId, taskId }: Props) {
         fetchComments();
     }, [projectId, taskId]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (!newComment.trim()) return;
         try {
             await apiFetch(`/api/projects/${projectId}/tasks/${taskId}/comments`, {
                 method: 'POST',
-                body: JSON.stringify({ content: newComment })
+                body: JSON.stringify({content: newComment})
             });
             setNewComment('');
             fetchComments();
@@ -54,7 +54,7 @@ export function TaskComments({ projectId, taskId }: Props) {
     const handleDelete = async (id: number) => {
         if (!window.confirm('Удалить комментарий?')) return;
         try {
-            await apiFetch(`/api/comments/${id}`, { method: 'DELETE' });
+            await apiFetch(`/api/comments/${id}`, {method: 'DELETE'});
             fetchComments();
         } catch (err) {
             alert('Ошибка удаления');
@@ -70,7 +70,7 @@ export function TaskComments({ projectId, taskId }: Props) {
         try {
             await apiFetch(`/api/comments/${id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ content: editContent })
+                body: JSON.stringify({content: editContent})
             });
             setEditingId(null);
             fetchComments();
@@ -109,8 +109,10 @@ export function TaskComments({ projectId, taskId }: Props) {
                                         rows={2}
                                     />
                                     <div className={styles.editActions}>
-                                        <Button onClick={() => handleUpdate(comment.id)} variant="success" style={{padding: '4px 12px', fontSize: '12px'}}>Сохранить</Button>
-                                        <Button onClick={() => setEditingId(null)} variant="danger" style={{padding: '4px 12px', fontSize: '12px'}}>Отменить</Button>
+                                        <Button onClick={() => handleUpdate(comment.id)} variant="success"
+                                                style={{padding: '4px 12px', fontSize: '12px'}}>Сохранить</Button>
+                                        <Button onClick={() => setEditingId(null)} variant="danger"
+                                                style={{padding: '4px 12px', fontSize: '12px'}}>Отменить</Button>
                                     </div>
                                 </div>
                             ) : (
@@ -118,11 +120,13 @@ export function TaskComments({ projectId, taskId }: Props) {
                                     <p className={styles.content}>{comment.content}</p>
                                     {canManage && (
                                         <div className={styles.actions}>
-                                            <button onClick={() => startEdit(comment)} className={styles.actionBtn} title="Редактировать">
-                                                <EditIcon size={14} />
+                                            <button onClick={() => startEdit(comment)} className={styles.actionBtn}
+                                                    title="Редактировать">
+                                                <EditIcon size={14}/>
                                             </button>
-                                            <button onClick={() => handleDelete(comment.id)} className={styles.actionBtnDelete} title="Удалить">
-                                                <TrashIcon size={14} />
+                                            <button onClick={() => handleDelete(comment.id)}
+                                                    className={styles.actionBtnDelete} title="Удалить">
+                                                <TrashIcon size={14}/>
                                             </button>
                                         </div>
                                     )}
@@ -134,7 +138,6 @@ export function TaskComments({ projectId, taskId }: Props) {
                 {comments.length === 0 && <p className={styles.empty}>Комментариев пока нет.</p>}
             </div>
 
-            {/* Форма добавления */}
             <form onSubmit={handleSubmit} className={styles.addForm}>
                 <textarea
                     className={styles.textarea}

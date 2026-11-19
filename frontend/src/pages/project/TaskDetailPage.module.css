@@ -20,14 +20,14 @@
 
 .layout {
     display: grid;
-    grid-template-columns: 1fr 300px; /* Слева резиновая, справа 300px */
+    grid-template-columns: 1fr 300px;
     gap: var(--spacing-xl);
     align-items: start;
 }
 
 @media (max-width: 768px) {
     .layout {
-        grid-template-columns: 1fr; /* На мобилках — одна колонка */
+        grid-template-columns: 1fr;
     }
 }
 
@@ -79,16 +79,14 @@
     margin: 0;
 }
 
-/* Нижняя панель действий */
 .actionFooter {
     padding-top: var(--spacing-lg);
     border-top: 1px solid var(--color-border);
 }
 
-/* Сайдбар */
 .sidebar {
     position: sticky;
-    top: var(--spacing-xl); /* Чтобы при скролле оставался на месте */
+    top: var(--spacing-xl);
 }
 
 .sidebarTitle {
@@ -130,6 +128,7 @@
     padding: 4px;
     border-radius: var(--radius-sm);
 }
+
 .editTagsBtn:hover {
     background: var(--color-bg);
     color: var(--color-primary);

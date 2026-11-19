@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import React, {useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {Button} from '../components/ui/Button';
+import {Input} from '../components/ui/Input';
+import {Card} from '../components/ui/Card';
 import styles from './RegisterPage.module.css';
+import {Alert} from "../components/ui/Alert";
 
 interface RegisterError {
     violations?: Array<{ propertyPath: string; message: string }>;
@@ -26,7 +27,7 @@ export function RegisterPage() {
         setFieldErrors({});
 
         if (password !== passwordConfirm) {
-            setFieldErrors({ password: 'Пароли не совпадают' });
+            setFieldErrors({password: 'Пароли не совпадают'});
             return;
         }
 
@@ -35,12 +36,12 @@ export function RegisterPage() {
         try {
             const response = await fetch('/api/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password}),
             });
 
             if (response.status === 201) {
-                navigate('/login', { state: { registered: true } });
+                navigate('/login', {state: {registered: true}});
                 return;
             }
 
@@ -55,7 +56,7 @@ export function RegisterPage() {
             }
 
             if (response.status === 409) {
-                setFieldErrors({ email: 'Этот email уже зарегистрирован' });
+                setFieldErrors({email: 'Этот email уже зарегистрирован'});
                 return;
             }
 
@@ -102,7 +103,7 @@ export function RegisterPage() {
                         autoComplete="new-password"
                         disabled={loading}
                     />
-                    {error && <div className={styles.error}>{error}</div>}
+                    {error && <Alert type="error">{error}</Alert>}
                     <Button type="submit" disabled={loading}>
                         {loading ? 'Регистрация...' : 'Зарегистрироваться'}
                     </Button>

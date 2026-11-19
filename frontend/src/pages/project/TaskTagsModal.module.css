@@ -5,7 +5,7 @@
     max-height: 300px;
     overflow-y: auto;
     margin-bottom: var(--spacing-lg);
-    padding-right: 8px; /* Место под скроллбар */
+    padding-right: 8px;
 }
 
 .tagRow {
@@ -70,7 +70,7 @@
 }
 
 .createForm > div {
-    flex: 1; /* Растягиваем инпут на всё доступное место */
+    flex: 1;
 }
 
 .modalActions {
@@ -81,12 +81,10 @@
     border-top: 1px solid var(--color-border);
 }
 
-/* Обертка для инпута названия, чтобы он занимал всё свободное место */
 .createInputWrapper {
     flex: 1;
 }
 
-/* Обертка для выбора цвета */
 .colorPickerWrapper {
     display: flex;
     flex-direction: column;
@@ -99,7 +97,6 @@
     color: var(--color-text);
 }
 
-/* Красивый квадратик с цветом */
 .colorInput {
     width: 42px;
     height: 42px;
@@ -108,12 +105,12 @@
     border-radius: var(--radius-sm);
     cursor: pointer;
     background: var(--color-surface);
-    /* Убираем стандартные отступы внутри input */
 }
 
 .colorInput::-webkit-color-swatch-wrapper {
     padding: 0;
 }
+
 .colorInput::-webkit-color-swatch {
     border: none;
     border-radius: calc(var(--radius-sm) - 1px);
