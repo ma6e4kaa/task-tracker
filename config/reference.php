@@ -4,10 +4,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use BackedEnum;
-use Closure;
 use Symfony\Component\Config\Loader\ParamConfigurator as Param;
-use UnitEnum;
 
 /**
  * This class provides array-shapes for configuring the services and bundles of an application.
@@ -36,11 +33,11 @@ use UnitEnum;
  *     type?: string|null,
  *     ignore_errors?: bool|'not_found',
  * }>
- * @psalm-type ParametersConfig = array<string, scalar|UnitEnum|array<scalar|UnitEnum|array<mixed>|Param|null>|Param|null>
+ * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array<mixed>|Param|null>|Param|null>
  * @psalm-type ArgumentsType = list<mixed>|array<string, mixed>
  * @psalm-type CallType = array<string, ArgumentsType>|array{0:string, 1?:ArgumentsType, 2?:bool}|array{method:string, arguments?:ArgumentsType, returns_clone?:bool}
  * @psalm-type TagsType = list<string|array<string, array<string, mixed>>> // arrays inside the list must have only one element, with the tag name as the key
- * @psalm-type CallbackType = string|array{0:string|ReferenceConfigurator,1:string}|Closure|ReferenceConfigurator|ExpressionConfigurator
+ * @psalm-type CallbackType = string|array{0:string|ReferenceConfigurator,1:string}|\Closure|ReferenceConfigurator|ExpressionConfigurator
  * @psalm-type DeprecationType = array{package: string, version: string, message?: string}
  * @psalm-type DefaultsType = array{
  *     public?: bool,
@@ -208,7 +205,7 @@ use UnitEnum;
  *             supports?: Param|string|list<scalar|Param|null>,
  *             definition_validators?: list<scalar|Param|null>,
  *             support_strategy?: scalar|Param|null,
- *             initial_marking?: BackedEnum|Param|string|list<scalar|Param|null>,
+ *             initial_marking?: \BackedEnum|Param|string|list<scalar|Param|null>,
  *             events_to_dispatch?: null|list<string|Param>,
  *             places?: Param|string|list<array{ // Default: []
  *                 name?: scalar|Param|null,
@@ -217,11 +214,11 @@ use UnitEnum;
  *             transitions?: list<array{ // Default: []
  *                 name?: string|Param,
  *                 guard?: string|Param, // An expression to block the transition.
- *                 from?: BackedEnum|Param|string|list<array{ // Default: []
+ *                 from?: \BackedEnum|Param|string|list<array{ // Default: []
  *                     place?: string|Param,
  *                     weight?: int|Param, // Default: 1
  *                 }>,
- *                 to?: BackedEnum|Param|string|list<array{ // Default: []
+ *                 to?: \BackedEnum|Param|string|list<array{ // Default: []
  *                     place?: string|Param,
  *                     weight?: int|Param, // Default: 1
  *                 }>,

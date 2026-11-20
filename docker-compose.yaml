@@ -69,6 +69,7 @@ services:
             - ./frontend:/app
             - /app/node_modules
         environment:
+            - BROWSER=none
             - CHOKIDAR_USEPOLLING=true
             - WATCHPACK_POLLING=true
         networks:

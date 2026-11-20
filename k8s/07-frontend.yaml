@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: frontend
+    namespace: task-tracker
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: frontend
+    template:
+        metadata:
+            labels:
+                app: frontend
+        spec:
+            containers:
+                -   name: frontend
+                    image: task-tracker-frontend:latest
+                    imagePullPolicy: Never
+                    ports:
+                        -   containerPort: 3000
+                    env:
+                        -   name: BROWSER
+                            value: "none"
+                        -   name: CHOKIDAR_USEPOLLING
+                            value: "true"
+                        -   name: WATCHPACK_POLLING
+                            value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: frontend
+    namespace: task-tracker
+spec:
+    selector:
+        app: frontend
+    ports:
+        -   port: 3000
+            targetPort: 3000
